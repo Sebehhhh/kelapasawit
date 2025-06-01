@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
-use App\Models\Promotion;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class PromotionController extends Controller
+class TestimonialController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class PromotionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Promotion $promotion)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +42,7 @@ class PromotionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Promotion $promotion)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +50,7 @@ class PromotionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Promotion $promotion)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +58,7 @@ class PromotionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Promotion $promotion)
+    public function destroy(string $id)
     {
         //
     }

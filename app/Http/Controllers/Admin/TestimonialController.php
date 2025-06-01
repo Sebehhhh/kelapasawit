@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\Shipping;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class ShippingController extends Controller
+class TestimonialController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class ShippingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Shipping $shipping)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +42,7 @@ class ShippingController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Shipping $shipping)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +50,7 @@ class ShippingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Shipping $shipping)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +58,7 @@ class ShippingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Shipping $shipping)
+    public function destroy(string $id)
     {
         //
     }
