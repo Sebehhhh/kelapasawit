@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\User;
 
 class UserController extends Controller
 {
@@ -12,23 +12,22 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        // Ambil semua user kecuali user yg sedang login (opsional)
+        $users = User::where('id', '!=', auth()->id())->get();
+
+        return view('admin.users.index', compact('users'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    // Modal style (tidak perlu create & edit function)
+    // public function create() { ... }
+    // public function edit($id) { ... }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(\Illuminate\Http\Request $request)
     {
-        //
+        // Isi nanti (buat user baru via modal)
     }
 
     /**
@@ -36,23 +35,15 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        // Opsional: tampilkan detail user jika mau
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(\Illuminate\Http\Request $request, string $id)
     {
-        //
+        // Isi nanti (update user via modal)
     }
 
     /**
@@ -60,6 +51,6 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // Isi nanti (hapus user via modal)
     }
 }
