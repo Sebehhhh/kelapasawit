@@ -93,7 +93,7 @@
 
   {{-- SweetAlert Script --}}
   <script>
-    @if (session('status'))
+    @if (session('success'))
       Swal.fire({
         icon: 'success',
         title: 'Sukses',
