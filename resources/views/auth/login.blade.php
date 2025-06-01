@@ -1,47 +1,108 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!doctype html>
+<html lang="en">
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login Sistem Informasi Penjualan Bibit Kelapa Sawit UKM</title>
+  <link rel="shortcut icon" type="image/png" href="{{ asset('assets/images/logos/favicon.png') }}" />
+  <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+  {{-- SweetAlert2 CDN --}}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
+<body>
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <div class="position-relative overflow-hidden text-bg-light min-vh-100 d-flex align-items-center justify-content-center">
+      <div class="d-flex align-items-center justify-content-center w-100">
+        <div class="row justify-content-center w-100">
+          <div class="col-md-8 col-lg-6 col-xxl-3">
+            <div class="card mb-0">
+              <div class="card-body">
+                <a href="/" class="text-nowrap logo-img text-center d-block py-3 w-100">
+                  {{-- Logo UKM atau usaha bibit kelapa sawit-mu --}}
+                  <img src="{{ asset('assets/images/logos/logo.svg') }}" width="180" alt="Logo Penjualan Bibit Kelapa Sawit">
                 </a>
-            @endif
+                <p class="text-center mb-4">Sistem Informasi Promosi & Penjualan Bibit Kelapa Sawit UKM</p>
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+                {{-- Form Login --}}
+                <form method="POST" action="{{ route('login') }}">
+                  @csrf
+
+                  {{-- Input Email --}}
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email"
+                      class="form-control @error('email') is-invalid @enderror"
+                      id="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                    @error('email')
+                      <div class="invalid-feedback">
+                        {{ $message }}
+                      </div>
+                    @enderror
+                  </div>
+
+                  {{-- Input Password --}}
+                  <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password"
+                      class="form-control @error('password') is-invalid @enderror"
+                      id="password" name="password" required autocomplete="current-password">
+                    @error('password')
+                      <div class="invalid-feedback">
+                        {{ $message }}
+                      </div>
+                    @enderror
+                  </div>
+
+                  {{-- Remember Me --}}
+                  <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="form-check">
+                      <input class="form-check-input primary" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                      <label class="form-check-label text-dark" for="remember">
+                        Ingat Saya
+                      </label>
+                    </div>
+                    @if (Route::has('password.request'))
+                      <a class="text-primary fw-bold" href="{{ route('password.request') }}">Lupa Password?</a>
+                    @endif
+                  </div>
+
+                  {{-- Tombol Login --}}
+                  <button type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Masuk</button>
+
+                  {{-- Teks Tambahan --}}
+                  <div class="d-flex align-items-center justify-content-center">
+                    <p class="fs-4 mb-0 fw-bold">Belum punya akun?</p>
+                    <span class="ms-2">Silakan hubungi admin usaha</span>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
-    </form>
-</x-guest-layout>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
+  <script src="{{ asset('assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+
+  {{-- SweetAlert Script --}}
+  <script>
+    @if (session('status'))
+      Swal.fire({
+        icon: 'success',
+        title: 'Sukses',
+        text: "{{ session('status') }}",
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'OK'
+      });
+    @endif
+  </script>
+</body>
+
+</html>
