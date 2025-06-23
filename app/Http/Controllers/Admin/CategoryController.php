@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -12,54 +13,56 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Category::orderByDesc('created_at')->paginate(10);
+        return view('admin.categories.index', compact('categories'));
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Store a newly created category (AJAX).
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name'        => 'required|string|max:100|unique:categories,name',
+            'description' => 'nullable|string|max:1000',
+        ]);
+
+        $category = Category::create($validated);
+
+        return response()->json(['message' => 'Kategori berhasil ditambah.', 'category' => $category]);
     }
 
     /**
-     * Display the specified resource.
+     * Update the specified category (AJAX).
      */
-    public function show(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $category = Category::findOrFail($id);
+
+        $validated = $request->validate([
+            'name'        => 'required|string|max:100|unique:categories,name,' . $category->id,
+            'description' => 'nullable|string|max:1000',
+        ]);
+
+        $category->update($validated);
+
+        return response()->json(['message' => 'Kategori berhasil diupdate.']);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Remove the specified category (AJAX).
      */
-    public function edit(string $id)
+    public function destroy($id)
     {
-        //
-    }
+        $category = Category::findOrFail($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        // Validasi: Tidak hapus jika sudah ada produk terkait (optional, jika mau strict)
+        // if ($category->products()->exists()) {
+        //     return response()->json(['message' => 'Kategori tidak bisa dihapus karena masih punya produk!'], 422);
+        // }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $category->delete();
+
+        return response()->json(['message' => 'Kategori berhasil dihapus.']);
     }
 }
