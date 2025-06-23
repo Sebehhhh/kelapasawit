@@ -15,7 +15,7 @@ class ProductSeeder extends Seeder
     {
         Product::insert([
             [
-                'category_id' => 7,
+                'category_id' => 1,
                 'name' => 'Bibit Sawit Unggul A',
                 'description' => 'Bibit sawit varietas unggul, siap tanam.',
                 'price' => 30000,
@@ -25,7 +25,7 @@ class ProductSeeder extends Seeder
                 // 'status' => 'aktif',
             ],
             [
-                'category_id' => 7,
+                'category_id' => 2,
                 'name' => 'Bibit Sawit Lokal B',
                 'description' => 'Bibit sawit lokal, sehat dan berkualitas.',
                 'price' => 25000,
@@ -35,7 +35,7 @@ class ProductSeeder extends Seeder
                 // 'status' => 'aktif',
             ],
             [
-                'category_id' => 7,
+                'category_id' => 3,
                 'name' => 'Bibit Sawit Impor C',
                 'description' => 'Bibit impor dari Thailand, produktivitas tinggi.',
                 'price' => 40000,

@@ -86,7 +86,7 @@
           </li>
           <li class="sidebar-item">
             <a class="sidebar-link" href="{{ route('customer.orders.index') }}">
-              <i class="ti ti-shopping-bag"></i>
+              <i class="ti ti-shopping-cart"></i>
               <span class="hide-menu">Pesanan Saya</span>
             </a>
           </li>

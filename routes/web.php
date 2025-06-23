@@ -24,7 +24,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // ================= ADMIN ROUTE GROUP =================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function() {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::resource('products', AdminProductController::class);
     Route::resource('categories', AdminCategoryController::class);
     Route::resource('promotions', AdminPromotionController::class);
@@ -36,8 +36,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 });
 
 // ================= CUSTOMER ROUTE GROUP =================
-Route::prefix('customer')->name('customer.')->middleware(['auth', 'customer'])->group(function() {
-    Route::resource('products', CustomerProductController::class)->only(['index', 'show']);
+Route::prefix('customer')->name('customer.')->middleware(['auth', 'customer'])->group(function () {
+    Route::resource('products', CustomerProductController::class)->only(['index']);
     Route::resource('orders', CustomerOrderController::class)->except(['destroy']);
     Route::resource('payments', CustomerPaymentController::class)->only(['create', 'store', 'show']);
     Route::resource('testimonials', CustomerTestimonialController::class)->only(['index', 'create', 'store']);
@@ -51,4 +51,4 @@ Route::prefix('customer')->name('customer.')->middleware(['auth', 'customer'])->
 // Route::get('/katalog', [PublicProductController::class, 'index'])->name('katalog');
 // Route::get('/promosi', [PublicPromotionController::class, 'index'])->name('promosi');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
