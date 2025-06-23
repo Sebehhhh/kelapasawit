@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             'email' => 'customer@kelapasawit.com',
             'password' => Hash::make('password'),
             'phone' => '081298765432',
-            'role' => 'customer',
+            'role' => 'pelanggan',
         ]);
     }
 }
