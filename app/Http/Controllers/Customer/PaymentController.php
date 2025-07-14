@@ -69,4 +69,18 @@ class PaymentController extends Controller
             ]);
         }
     }
+
+    /**
+     * Tampilkan riwayat pembayaran customer
+     */
+    public function index()
+    {
+        $payments = Payment::with(['order'])
+            ->whereHas('order', function($q){
+                $q->where('user_id', Auth::id());
+            })
+            ->orderByDesc('created_at')
+            ->paginate(10);
+        return view('customer.payments.index', compact('payments'));
+    }
 }

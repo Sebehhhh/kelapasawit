@@ -9,6 +9,34 @@
         </button>
     </div>
 </div>
+<!-- FILTER USER -->
+<div class="card border-0 shadow mb-4">
+    <div class="card-body pb-2">
+        <form class="row g-2 align-items-end" method="GET" action="">
+            <div class="col-md-3">
+                <label for="filter_name" class="form-label mb-1">Nama</label>
+                <input type="text" name="name" id="filter_name" class="form-control" placeholder="Cari nama..." value="{{ $searchName ?? '' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="filter_email" class="form-label mb-1">Email</label>
+                <input type="text" name="email" id="filter_email" class="form-control" placeholder="Cari email..." value="{{ $searchEmail ?? '' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="filter_role" class="form-label mb-1">Role</label>
+                <select name="role" id="filter_role" class="form-select">
+                    <option value="">Semua Role</option>
+                    <option value="admin" @if(isset($selectedRole) && $selectedRole=='admin') selected @endif>Admin</option>
+                    <option value="owner" @if(isset($selectedRole) && $selectedRole=='owner') selected @endif>Owner</option>
+                    <option value="pelanggan" @if(isset($selectedRole) && $selectedRole=='pelanggan') selected @endif>Pelanggan</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-success mt-3">Filter</button>
+                <a href="{{ route('admin.users.index') }}" class="btn btn-secondary mt-3">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div class="card border-0 shadow mb-4">
     <div class="card-body">
@@ -60,7 +88,7 @@
             </table>
         </div>
         <div class="mt-3">
-            {{ $users->links() }}
+            {{ $users->links('pagination::bootstrap-4') }}
         </div>
     </div>
 </div>

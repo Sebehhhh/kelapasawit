@@ -4,9 +4,54 @@
 <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
         <h4 class="fw-bold mb-0">Daftar Produk</h4>
-        <button type="button" class="btn btn-primary" id="btnAddProduct">
-            <i class="ti ti-plus"></i> Tambah Produk
-        </button>
+        <div>
+            <a href="{{ route('admin.products.printReport', request()->all()) }}" target="_blank" class="btn btn-success me-2">
+                <i class="ti ti-printer"></i> Cetak PDF
+            </a>
+            <button type="button" class="btn btn-primary" id="btnAddProduct">
+                <i class="ti ti-plus"></i> Tambah Produk
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- FILTER PRODUK -->
+<div class="card border-0 shadow mb-4">
+    <div class="card-body pb-2">
+        <form class="row g-2 align-items-end" method="GET" action="">
+            <div class="col-md-3">
+                <label for="filter_category" class="form-label mb-1">Kategori</label>
+                <select name="category_id" id="filter_category" class="form-select">
+                    <option value="">-- Semua Kategori --</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}" @if(isset($selectedCategory) && $selectedCategory == $cat->id) selected @endif>{{ $cat->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filter_name" class="form-label mb-1">Nama Produk</label>
+                <input type="text" name="name" id="filter_name" class="form-control" placeholder="Cari nama produk..." value="{{ $searchName ?? '' }}">
+            </div>
+            <div class="col-md-2">
+                <label for="sort_by" class="form-label mb-1">Urutkan</label>
+                <select name="sort_by" id="sort_by" class="form-select">
+                    <option value="">Tanggal Terbaru</option>
+                    <option value="price" @if(isset($sortBy) && $sortBy=='price') selected @endif>Harga</option>
+                    <option value="stock" @if(isset($sortBy) && $sortBy=='stock') selected @endif>Stok</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="sort_order" class="form-label mb-1">Urutan</label>
+                <select name="sort_order" id="sort_order" class="form-select">
+                    <option value="desc" @if(isset($sortOrder) && $sortOrder=='desc') selected @endif>Terbesar</option>
+                    <option value="asc" @if(isset($sortOrder) && $sortOrder=='asc') selected @endif>Terkecil</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-success mt-3">Filter</button>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary mt-3">Reset</a>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -65,7 +110,7 @@
             </table>
         </div>
         <div class="mt-3">
-            {{ $products->links() }}
+            {{ $products->links('pagination::bootstrap-4') }}
         </div>
     </div>
 </div>

@@ -42,17 +42,30 @@ class ProfileController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Request $request)
     {
-        //
+        $user = $request->user();
+        return view('customer.profile.edit', compact('user'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        //
+        $user = $request->user();
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'address' => 'required|string|min:5|max:255',
+            'password' => 'nullable|string|min:6|confirmed',
+        ]);
+        $user->name = $validated['name'];
+        $user->address = $validated['address'];
+        if (!empty($validated['password'])) {
+            $user->password = bcrypt($validated['password']);
+        }
+        $user->save();
+        return back()->with('success', 'Profil berhasil diperbarui.');
     }
 
     /**

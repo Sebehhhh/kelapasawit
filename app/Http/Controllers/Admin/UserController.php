@@ -14,12 +14,30 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Tidak tampilkan akun yang sedang login (opsional)
-        $users = User::where('id', '!=', Auth::id())->orderByDesc('created_at')->paginate(10);
+        $query = User::where('id', '!=', Auth::id());
 
-        return view('admin.users.index', compact('users'));
+        // Filter nama
+        $searchName = $request->name;
+        if ($searchName) {
+            $query->where('name', 'like', '%' . $searchName . '%');
+        }
+
+        // Filter email
+        $searchEmail = $request->email;
+        if ($searchEmail) {
+            $query->where('email', 'like', '%' . $searchEmail . '%');
+        }
+
+        // Filter role
+        $selectedRole = $request->role;
+        if ($selectedRole) {
+            $query->where('role', $selectedRole);
+        }
+
+        $users = $query->orderByDesc('created_at')->paginate(10)->appends($request->all());
+        return view('admin.users.index', compact('users', 'searchName', 'searchEmail', 'selectedRole'));
     }
 
     /**

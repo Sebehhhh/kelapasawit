@@ -1,5 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Pesanan Saya')
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+@endpush
 @section('content')
 <div class="row mb-4">
     <div class="col-12">
@@ -65,8 +68,52 @@
                                 <i class="ti ti-credit-card"></i> Bayar
                             </button>
                             @endif
+                            @if($order->status === 'shipped' && $detail && $detail->product && !$detail->testimonial)
+                            <button type="button" class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#modalGiveTestimonial{{ $detail->id }}">
+                                <i class="ti ti-star"></i> Beri Testimoni
+                            </button>
+                            @endif
                         </td>
                     </tr>
+                    @if($order->status === 'shipped' && $detail && $detail->product && !$detail->testimonial)
+                    <!-- Modal Testimoni per order detail -->
+                    <div class="modal fade" id="modalGiveTestimonial{{ $detail->id }}" tabindex="-1" aria-labelledby="modalGiveTestimonialLabel{{ $detail->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form id="formTestimoni{{ $detail->id }}" autocomplete="off" method="POST" action="{{ route('customer.testimonials.store') }}">
+                                @csrf
+                                <input type="hidden" name="order_detail_id" value="{{ $detail->id }}">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold" id="modalGiveTestimonialLabel{{ $detail->id }}">Beri Testimoni</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-2">
+                                            <label class="form-label">Produk</label>
+                                            <input type="text" class="form-control" value="{{ $detail->product->name }}" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Rating</label>
+                                            <select name="rating" class="form-select" required>
+                                                @for($i=1;$i<=5;$i++)
+                                                    <option value="{{ $i }}">{{ $i }} Bintang</option>
+                                                @endfor
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Komentar</label>
+                                            <textarea name="message" class="form-control" rows="3" maxlength="1000" required></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-warning">Kirim Testimoni</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    @endif
                     @empty
                     <tr>
                         <td colspan="7" class="text-center text-muted">Belum ada pesanan.</td>
@@ -76,7 +123,7 @@
             </table>
         </div>
         <div class="mt-3">
-            {{ $orders->links() }}
+            {{ $orders->links('pagination::bootstrap-4') }}
         </div>
     </div>
 </div>
@@ -133,6 +180,46 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-success">Kirim Pembayaran</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Modal Testimoni --}}
+<div class="modal fade" id="modalGiveTestimonial" tabindex="-1" aria-labelledby="modalGiveTestimonialLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="formTestimoni" autocomplete="off">
+            @csrf
+            <input type="hidden" name="order_detail_id" id="testiOrderDetailId">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalGiveTestimonialLabel">Beri Testimoni</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label">Produk</label>
+                        <input type="text" class="form-control" id="testiProductName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <div id="testiRating" class="mb-1">
+                            @for($i=1;$i<=5;$i++)
+                                <i class="ti ti-star rating-star" data-value="{{ $i }}" style="font-size:1.5rem;cursor:pointer;color:#ccc;"></i>
+                            @endfor
+                        </div>
+                        <input type="hidden" name="rating" id="testiRatingValue" value="5">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Komentar</label>
+                        <textarea name="message" class="form-control" id="testiMessage" rows="3" maxlength="1000" required></textarea>
+                    </div>
+                    <div id="testiAlert" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning">Kirim Testimoni</button>
                 </div>
             </div>
         </form>
@@ -227,4 +314,71 @@
         alert.classList.remove('d-none');
     }
 </script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Modal Testimoni
+let testiModal = new bootstrap.Modal(document.getElementById('modalGiveTestimonial'));
+document.querySelectorAll('.btn-give-testimonial').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.getElementById('testiOrderDetailId').value = this.dataset.order_detail_id;
+        document.getElementById('testiProductName').value = this.dataset.product_name || '-';
+        document.getElementById('testiMessage').value = '';
+        setRating(5);
+        document.getElementById('testiAlert').classList.add('d-none');
+        testiModal.show();
+    });
+});
+// Rating bintang
+function setRating(val) {
+    document.getElementById('testiRatingValue').value = val;
+    document.querySelectorAll('#testiRating .rating-star').forEach((star, idx) => {
+        star.style.color = (idx < val) ? '#ffc107' : '#ccc';
+    });
+}
+document.querySelectorAll('#testiRating .rating-star').forEach(star => {
+    star.addEventListener('click', function() {
+        setRating(Number(this.dataset.value));
+    });
+});
+// Submit Testimoni
+const formTestimoni = document.getElementById('formTestimoni');
+formTestimoni.onsubmit = function(e) {
+    e.preventDefault();
+    let btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    let formData = new FormData(this);
+    fetch("{{ route('customer.testimonials.store') }}", {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(async response => {
+        btn.disabled = false;
+        let data = await response.text();
+        try { data = JSON.parse(data); } catch {}
+        if(response.ok && (!data.error)){
+            testiModal.hide();
+            Swal.fire('Berhasil!', data.message || 'Testimoni berhasil dikirim!', 'success').then(() => {
+                window.location.reload();
+            });
+        } else {
+            showTestiError(data.message || data.error || 'Gagal mengirim testimoni!');
+        }
+    })
+    .catch(error => {
+        btn.disabled = false;
+        showTestiError('Gagal terhubung ke server!');
+    });
+};
+function showTestiError(msg){
+    let alert = document.getElementById('testiAlert');
+    alert.innerText = msg;
+    alert.classList.remove('d-none');
+}
+</script>
+@endpush
 @endsection

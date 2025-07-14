@@ -59,12 +59,6 @@
             </a>
           </li>
           <li class="sidebar-item">
-            <a class="sidebar-link" href="{{ route('admin.reports.index') }}">
-              <i class="ti ti-file-analytics"></i>
-              <span class="hide-menu">Laporan Penjualan</span>
-            </a>
-          </li>
-          <li class="sidebar-item">
             <a class="sidebar-link" href="{{ route('admin.testimonials.index') }}">
               <i class="ti ti-star"></i>
               <span class="hide-menu">Testimoni</span>
@@ -91,7 +85,7 @@
             </a>
           </li>
           <li class="sidebar-item">
-            <a class="sidebar-link" href="{{ route('customer.payments.create') }}">
+            <a class="sidebar-link" href="{{ route('customer.payments.index') }}">
               <i class="ti ti-credit-card"></i>
               <span class="hide-menu">Pembayaran</span>
             </a>
@@ -102,10 +96,36 @@
               <span class="hide-menu">Testimoni</span>
             </a>
           </li>
+        @endif
+
+        {{-- Hanya untuk owner --}}
+        @if(auth()->user()->role === 'owner')
+          <li class="nav-small-cap mt-2">
+            <iconify-icon icon="solar:monitor-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+            <span class="hide-menu">Owner Menu</span>
+          </li>
           <li class="sidebar-item">
-            <a class="sidebar-link" href="{{ route('customer.profile.edit') }}">
-              <i class="ti ti-user"></i>
-              <span class="hide-menu">Profil Saya</span>
+            <a class="sidebar-link" href="{{ route('owner.products.index') }}">
+              <i class="ti ti-package"></i>
+              <span class="hide-menu">Produk</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a class="sidebar-link" href="{{ route('owner.orders.index') }}">
+              <i class="ti ti-shopping-cart"></i>
+              <span class="hide-menu">Order</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a class="sidebar-link" href="{{ route('owner.promotions.index') }}">
+              <i class="ti ti-discount"></i>
+              <span class="hide-menu">Promosi</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a class="sidebar-link" href="{{ route('owner.testimonials.index') }}">
+              <i class="ti ti-star"></i>
+              <span class="hide-menu">Testimoni</span>
             </a>
           </li>
         @endif

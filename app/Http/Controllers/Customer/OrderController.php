@@ -14,8 +14,18 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with(['details.product.category'])->where('user_id', auth()->id())->orderByDesc('order_date')->paginate(10);
-        return view('customer.orders.index', compact('orders'));
+        $orders = Order::with(['details.product', 'details.testimonial', 'details.product.category'])
+            ->where('user_id', auth()->id())
+            ->orderByDesc('order_date')
+            ->paginate(10);
+        // Ambil order detail yang eligible untuk testimoni
+        $eligibleOrderDetails = \App\Models\OrderDetail::whereHas('order', function($q) {
+            $q->where('user_id', auth()->id())->where('status', 'shipped');
+        })
+        ->whereDoesntHave('testimonial')
+        ->with('product')
+        ->get();
+        return view('customer.orders.index', compact('orders', 'eligibleOrderDetails'));
     }
 
     /**

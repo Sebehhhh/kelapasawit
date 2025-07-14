@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Testimonial extends Model
 {
     protected $fillable = [
-        'user_id', 'product_id', 'message', 'rating'
+        'user_id', 'product_id', 'order_detail_id', 'message', 'rating'
     ];
 
     public function user()
@@ -18,5 +18,10 @@ class Testimonial extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function orderDetail()
+    {
+        return $this->belongsTo(OrderDetail::class);
     }
 }

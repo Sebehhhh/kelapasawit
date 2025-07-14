@@ -13,22 +13,23 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin dummy
-        User::create([
-            'name' => 'Admin Demo',
-            'email' => 'admin@kelapasawit.com',
-            'password' => Hash::make('password'), // Jangan lupa ganti saat production!
-            'phone' => '081234567890',
-            'role' => 'admin',
-        ]);
-
-        // Customer dummy
-        User::create([
-            'name' => 'Customer Demo',
-            'email' => 'customer@kelapasawit.com',
+        // Owner 1
+        \App\Models\User::create([
+            'name' => 'Pemilik Kebun',
+            'email' => 'owner@kelapasawit.com',
             'password' => Hash::make('password'),
-            'phone' => '081298765432',
-            'role' => 'customer',
+            'phone' => '081234567892',
+            'role' => 'owner',
         ]);
+        // Customer 10
+        for ($i = 1; $i <= 10; $i++) {
+            \App\Models\User::create([
+                'name' => 'Customer ' . $i,
+                'email' => 'customer' . $i . '@kelapasawit.com',
+                'password' => Hash::make('password'),
+                'phone' => '08120000000' . $i,
+                'role' => 'customer',
+            ]);
+        }
     }
 }
