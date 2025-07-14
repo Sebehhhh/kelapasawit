@@ -32,6 +32,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('users', AdminUserController::class);
     Route::resource('reports', AdminReportController::class);
     Route::resource('testimonials', AdminTestimonialController::class);
+    Route::get('promotions/products-list', [AdminPromotionController::class, 'productsList'])->name('promotions.productsList');
     // Tambahkan menu khusus admin lain di sini
 });
 

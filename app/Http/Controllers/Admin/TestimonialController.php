@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Testimonial;
+use App\Models\User;
+use App\Models\Product;
 
 class TestimonialController extends Controller
 {
@@ -12,7 +15,10 @@ class TestimonialController extends Controller
      */
     public function index()
     {
-        //
+        $testimonials = Testimonial::with(['user', 'product'])->orderByDesc('created_at')->paginate(10);
+        $users = User::all();
+        $products = Product::all();
+        return view('admin.testimonials.index', compact('testimonials', 'users', 'products'));
     }
 
     /**
@@ -28,7 +34,17 @@ class TestimonialController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'product_id' => 'required|exists:products,id',
+            'message' => 'required|string|max:1000',
+            'rating' => 'required|integer|min:1|max:5',
+        ]);
+        $testi = Testimonial::create($validated);
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Testimoni berhasil ditambah.', 'testimonial' => $testi]);
+        }
+        return redirect()->route('admin.testimonials.index')->with('success', 'Testimoni berhasil ditambah.');
     }
 
     /**
@@ -50,16 +66,32 @@ class TestimonialController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $testi = Testimonial::findOrFail($id);
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'product_id' => 'required|exists:products,id',
+            'message' => 'required|string|max:1000',
+            'rating' => 'required|integer|min:1|max:5',
+        ]);
+        $testi->update($validated);
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Testimoni berhasil diupdate.', 'testimonial' => $testi]);
+        }
+        return redirect()->route('admin.testimonials.index')->with('success', 'Testimoni berhasil diupdate.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $testi = Testimonial::findOrFail($id);
+        $testi->delete();
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Testimoni berhasil dihapus.']);
+        }
+        return redirect()->route('admin.testimonials.index')->with('success', 'Testimoni berhasil dihapus.');
     }
 }

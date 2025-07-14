@@ -4,15 +4,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Order;
+use Illuminate\Support\Carbon;
 
 class ReportController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $start = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $end = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+        $orders = Order::whereBetween('order_date', [$start, $end])->where('status', '!=', 'cancelled')->get();
+        $totalOrder = $orders->count();
+        $totalAmount = $orders->sum('total_amount');
+        return view('admin.reports.index', compact('orders', 'totalOrder', 'totalAmount', 'start', 'end'));
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Order;
 
 class OrderController extends Controller
 {
@@ -12,7 +13,10 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        $orders = Order::with(['user', 'details.product', 'payment', 'shipping', 'invoice'])
+            ->orderByDesc('created_at')
+            ->paginate(10);
+        return view('admin.orders.index', compact('orders'));
     }
 
     /**
@@ -50,9 +54,18 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $order = Order::findOrFail($id);
+        $validated = $request->validate([
+            'status' => 'required|in:pending,paid,shipped,cancelled',
+        ]);
+        $order->status = $validated['status'];
+        $order->save();
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Status order berhasil diupdate.', 'order' => $order]);
+        }
+        return redirect()->route('admin.orders.index')->with('success', 'Status order berhasil diupdate.');
     }
 
     /**
