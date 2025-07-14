@@ -69,6 +69,9 @@
 
   <!-- solar icons -->
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+  
+  <!-- Stack untuk scripts tambahan dari halaman lain -->
+  @stack('scripts')
 </body>
 
 </html>

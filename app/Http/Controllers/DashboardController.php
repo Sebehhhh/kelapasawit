@@ -39,11 +39,32 @@ class DashboardController extends Controller
 
         // Order terbaru (5 terakhir)
         $orderTerbaru = Order::with('user')->orderByDesc('created_at')->take(5)->get();
+        
+        // Data untuk grafik penjualan bulanan
+        $chartPenjualan = [];
+        $chartPenjualan['labels'] = [];
+        $chartPenjualan['data'] = [];
+        
+        // Mengambil data penjualan 6 bulan terakhir
+        for ($i = 5; $i >= 0; $i--) {
+            $currentMonth = Carbon::now()->subMonths($i);
+            $monthName = $currentMonth->translatedFormat('F');
+            $monthYear = $currentMonth->format('Y-m');
+            
+            $chartPenjualan['labels'][] = $monthName;
+            
+            $monthlyRevenue = Order::whereYear('created_at', $currentMonth->year)
+                ->whereMonth('created_at', $currentMonth->month)
+                ->where('status', '!=', 'cancelled')
+                ->sum('total_amount');
+                
+            $chartPenjualan['data'][] = (int) $monthlyRevenue;
+        }
 
         return view('dashboard', compact(
             'totalOrderToday', 'totalOrderMonth', 'totalRevenueMonth', 'totalProduct',
             'totalPromo', 'totalTestimoni', 'totalCustomer', 'totalAdmin', 'totalOwner',
-            'orderPending', 'orderSelesai', 'produkTerlaris', 'orderTerbaru'
+            'orderPending', 'orderSelesai', 'produkTerlaris', 'orderTerbaru', 'chartPenjualan'
         ));
     }
-} 
+}

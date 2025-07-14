@@ -1,8 +1,11 @@
 $(function () {
-
-
+  // Dashboard.js initialization
+  // Kode chart di dashboard.blade.php akan digunakan untuk menampilkan grafik penjualan
+  // Kode di bawah ini dinonaktifkan untuk menghindari konflik dengan chart di dashboard.blade.php
+  
+  /*
   // -----------------------------------------------------------------------
-  // sales overview
+  // sales overview - dinonaktifkan karena tidak digunakan
   // -----------------------------------------------------------------------
 
   var options_sales_overview = {
@@ -84,6 +87,5 @@ $(function () {
     options_sales_overview
   );
   chart_column_basic.render();
-
-
+  */
 })

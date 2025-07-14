@@ -15,7 +15,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Order::with(['user', 'details.product', 'payment', 'invoice']);
+        $query = Order::with(['user', 'details.product', 'payment']);
 
         // Filter tanggal
         if ($request->filled('start_date')) {
@@ -105,7 +105,7 @@ class OrderController extends Controller
      */
     public function printReport(Request $request)
     {
-        $query = Order::with(['user', 'details.product', 'payment', 'invoice'])
+        $query = Order::with(['user', 'details.product', 'payment'])
             ->orderByDesc('created_at');
 
         // Filter berdasarkan tanggal jika ada

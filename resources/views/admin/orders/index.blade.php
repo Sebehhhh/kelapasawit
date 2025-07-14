@@ -243,9 +243,6 @@ $(document).ready(function() {
         });
         html += `</tbody></table>`;
         html += `<b>Total:</b> Rp${order.total_amount.toLocaleString('id-ID')}<br>`;
-        if(order.invoice) {
-            html += `<b>Invoice:</b> <a href='/storage/invoices/${order.invoice.file_path}' target='_blank'>${order.invoice.file_path}</a><br>`;
-        }
         if(order.payment) {
             html += `<b>Pembayaran:</b> ${order.payment.amount_paid ? 'Rp'+order.payment.amount_paid.toLocaleString('id-ID') : '-'} (${order.payment.status ?? '-'})<br>`;
             if(order.payment.proof_image) html += `<img src='/storage/payments/${order.payment.proof_image}' width='80'><br>`;
@@ -281,4 +278,4 @@ $(document).ready(function() {
     });
 });
 </script>
-@endsection 
+@endsection

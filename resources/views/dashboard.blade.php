@@ -140,7 +140,7 @@
     <div class="card border-0 shadow h-100">
       <div class="card-header bg-light fw-bold">Produk Terlaris (Top 5)</div>
       <div class="card-body p-0">
-        <div class="table-responsive">
+        <div class="table-responsive p-2">
           <table class="table table-sm table-bordered align-middle mb-0">
             <thead class="table-light">
               <tr>
@@ -170,7 +170,7 @@
     <div class="card border-0 shadow h-100">
       <div class="card-header bg-light fw-bold">Order Terbaru</div>
       <div class="card-body p-0">
-        <div class="table-responsive">
+        <div class="table-responsive p-2">
           <table class="table table-sm table-bordered align-middle mb-0">
             <thead class="table-light">
               <tr>
@@ -214,6 +214,10 @@
 @push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Menyimpan data dalam variabel JavaScript
+    var chartData = {!! json_encode($chartPenjualan['data'] ?? []) !!};
+    var chartLabels = {!! json_encode($chartPenjualan['labels'] ?? []) !!};
+    
     var options = {
       chart: {
         type: 'line',
@@ -222,10 +226,10 @@
       },
       series: [{
         name: 'Total Penjualan',
-        data: @json($chartPenjualan['data'] ?? [])
+        data: chartData
       }],
       xaxis: {
-        categories: @json($chartPenjualan['labels'] ?? []),
+        categories: chartLabels,
         labels: { style: { fontSize: '13px' } }
       },
       stroke: { curve: 'smooth', width: 3 },
