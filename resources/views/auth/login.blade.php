@@ -121,7 +121,7 @@
 
                   {{-- Teks Tambahan --}}
                   <div class="text-center mt-4">
-                    <p class="mb-0"><span class="fw-semibold">Belum punya akun?</span> Silakan hubungi admin usaha</p>
+                    <p class="mb-0"><span class="fw-semibold">Belum punya akun?</span> <a href="{{ route('register') }}" class="text-success fw-semibold">Daftar di sini</a></p>
                   </div>
                 </form>
               </div>
