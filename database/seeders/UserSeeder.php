@@ -15,21 +15,12 @@ class UserSeeder extends Seeder
     {
         // Owner 1
         \App\Models\User::create([
-            'name' => 'Pemilik Kebun',
-            'email' => 'owner@kelapasawit.com',
+            'name' => 'Admin',
+            'email' => 'admin@kelapasawit.com',
             'password' => Hash::make('password'),
-            'phone' => '081234567892',
-            'role' => 'owner',
+            'phone' => '081234567899',
+            'role' => 'admin',
         ]);
-        // Customer 10
-        for ($i = 1; $i <= 10; $i++) {
-            \App\Models\User::create([
-                'name' => 'Customer ' . $i,
-                'email' => 'customer' . $i . '@kelapasawit.com',
-                'password' => Hash::make('password'),
-                'phone' => '08120000000' . $i,
-                'role' => 'customer',
-            ]);
-        }
+        
     }
 }
