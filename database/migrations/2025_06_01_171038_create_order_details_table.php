@@ -17,11 +17,15 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id'); // FK ke products
             $table->integer('quantity');
             $table->decimal('price', 12, 2); // harga per item saat transaksi
+            $table->unsignedBigInteger('promotion_id')->nullable();
+            $table->decimal('original_price', 10, 2)->nullable();
+            $table->decimal('discount_amount', 10, 2)->default(0);
             $table->timestamps();
     
             // Foreign Key Constraints
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('promotion_id')->references('id')->on('promotions')->onDelete('set null');
         });
     }
 

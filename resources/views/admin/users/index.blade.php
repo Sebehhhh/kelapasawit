@@ -1,93 +1,198 @@
 @extends('layouts.app')
 @section('title', 'Kelola Akun Pengguna')
 @section('content')
-<div class="row mb-4">
-    <div class="col-12 d-flex justify-content-between align-items-center">
-        <h4 class="fw-bold mb-0">Daftar Akun Pengguna</h4>
-        <button type="button" class="btn btn-primary" id="btnAddUser">
-            <i class="ti ti-user-plus"></i> Tambah Pengguna
-        </button>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                <div class="card-body text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 fw-bold">
+                                <i class="ti ti-users me-2"></i>
+                                Kelola Akun Pengguna
+                            </h4>
+                            <p class="mb-0 opacity-75">Manajemen akun pengguna sistem</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('admin.users.printReport') }}" class="btn btn-dark">
+                                <i class="ti ti-file-download me-1"></i> Export PDF
+                            </a>
+                            <button type="button" class="btn btn-dark" id="btnAddUser">
+                                <i class="ti ti-user-plus me-1"></i> Tambah Pengguna
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-<!-- FILTER USER -->
-<div class="card border-0 shadow mb-4">
-    <div class="card-body pb-2">
-        <form class="row g-2 align-items-end" method="GET" action="">
-            <div class="col-md-3">
-                <label for="filter_name" class="form-label mb-1">Nama</label>
-                <input type="text" name="name" id="filter_name" class="form-control" placeholder="Cari nama..." value="{{ $searchName ?? '' }}">
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="ti ti-filter me-2 text-primary"></i>Filter & Pencarian
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form class="row g-3 align-items-end" method="GET" action="">
+                        <div class="col-md-3">
+                            <label for="filter_name" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-user me-1 text-primary"></i> Nama
+                            </label>
+                            <input type="text" name="name" id="filter_name" class="form-control" placeholder="Cari nama..." value="{{ $searchName ?? '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_email" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-mail me-1 text-primary"></i> Email
+                            </label>
+                            <input type="text" name="email" id="filter_email" class="form-control" placeholder="Cari email..." value="{{ $searchEmail ?? '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_role" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-user-check me-1 text-primary"></i> Role
+                            </label>
+                            <select name="role" id="filter_role" class="form-select">
+                                <option value="">Semua Role</option>
+                                <option value="admin" @if(isset($selectedRole) && $selectedRole=='admin') selected @endif>Admin</option>
+                                <option value="owner" @if(isset($selectedRole) && $selectedRole=='owner') selected @endif>Owner</option>
+                                <option value="customer" @if(isset($selectedRole) && $selectedRole=='customer') selected @endif>Customer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ti ti-search me-1"></i> Filter
+                            </button>
+                            <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
+                                <i class="ti ti-refresh me-1"></i> Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="filter_email" class="form-label mb-1">Email</label>
-                <input type="text" name="email" id="filter_email" class="form-control" placeholder="Cari email..." value="{{ $searchEmail ?? '' }}">
+        </div>
+    </div>
+
+    <!-- Data Table Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="ti ti-list me-2 text-primary"></i>Daftar Pengguna
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <tr>
+                                    <th class="text-center fw-bold" style="width: 60px">#</th>
+                                    <th class="fw-bold"><i class="ti ti-user me-1"></i>Nama</th>
+                                    <th class="fw-bold"><i class="ti ti-mail me-1"></i>Email</th>
+                                    <th class="fw-bold"><i class="ti ti-phone me-1"></i>No HP</th>
+                                    <th class="fw-bold text-center"><i class="ti ti-user-check me-1"></i>Role</th>
+                                    <th class="fw-bold"><i class="ti ti-calendar me-1"></i>Terdaftar</th>
+                                    <th class="fw-bold text-center" style="width:120px;"><i class="ti ti-settings me-1"></i>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($users as $user)
+                                <tr>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark fw-semibold">{{ $loop->iteration }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-{{ $user->role == 'admin' ? 'primary' : ($user->role == 'owner' ? 'warning' : 'secondary') }}-subtle rounded me-2">
+                                                <i class="ti ti-user text-{{ $user->role == 'admin' ? 'primary' : ($user->role == 'owner' ? 'warning' : 'secondary') }}"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-semibold">{{ $user->name }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">{{ $user->email }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">{{ $user->phone ?? '-' }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-{{ $user->role == 'admin' ? 'primary' : ($user->role == 'owner' ? 'warning' : 'secondary') }}-subtle text-{{ $user->role == 'admin' ? 'primary' : ($user->role == 'owner' ? 'warning' : 'secondary') }} px-3 py-2 rounded-pill">
+                                            @if($user->role == 'admin')
+                                                <i class="ti ti-shield-check me-1"></i>
+                                            @elseif($user->role == 'owner')
+                                                <i class="ti ti-crown me-1"></i>
+                                            @else
+                                                <i class="ti ti-user me-1"></i>
+                                            @endif
+                                            {{ ucfirst($user->role) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info-subtle text-info">
+                                            <i class="ti ti-calendar me-1"></i>
+                                            {{ $user->created_at->format('d/m/Y') }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-primary btn-sm btnEditUser" data-bs-toggle="tooltip" title="Edit" 
+                                                data-id="{{ $user->id }}" data-name="{{ $user->name }}" data-email="{{ $user->email }}"
+                                                data-phone="{{ $user->phone }}" data-role="{{ $user->role }}">
+                                                <i class="ti ti-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm btnDeleteUser" data-bs-toggle="tooltip" title="Hapus" 
+                                                data-id="{{ $user->id }}" data-name="{{ $user->name }}">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="ti ti-users text-muted" style="font-size: 3rem;"></i>
+                                            <h6 class="mt-2 text-muted">Belum ada pengguna</h6>
+                                            <p class="text-muted mb-0">Klik tombol "Tambah Pengguna" untuk menambah data</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @if(method_exists($users, 'hasPages') && $users->hasPages())
+                        <div class="card-footer bg-white border-0">
+                            <div class="d-flex justify-content-center">
+                                {{ $users->links('pagination::bootstrap-4') }}
+                            </div>
+                        </div>
+                    @endif
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="filter_role" class="form-label mb-1">Role</label>
-                <select name="role" id="filter_role" class="form-select">
-                    <option value="">Semua Role</option>
-                    <option value="admin" @if(isset($selectedRole) && $selectedRole=='admin') selected @endif>Admin</option>
-                    <option value="owner" @if(isset($selectedRole) && $selectedRole=='owner') selected @endif>Owner</option>
-                    <option value="pelanggan" @if(isset($selectedRole) && $selectedRole=='pelanggan') selected @endif>Pelanggan</option>
-                </select>
-            </div>
-            <div class="col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-success mt-3">Filter</button>
-                <a href="{{ route('admin.users.index') }}" class="btn btn-secondary mt-3">Reset</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div class="card border-0 shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>No HP</th>
-                        <th>Role</th>
-                        <th>Terdaftar</th>
-                        <th class="text-center" style="width:120px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($users as $user)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->phone ?? '-' }}</td>
-                        <td>
-                            <span
-                                class="badge bg-{{ $user->role == 'admin' ? 'primary' : ($user->role == 'owner' ? 'warning' : 'secondary') }}">
-                                {{ ucfirst($user->role) }}
-                            </span>
-                        </td>
-                        <td>{{ $user->created_at->format('d M Y') }}</td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-info btnEditUser" data-id="{{ $user->id }}"
-                                data-name="{{ $user->name }}" data-email="{{ $user->email }}"
-                                data-phone="{{ $user->phone }}" data-role="{{ $user->role }}">
-                                <i class="ti ti-edit"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-danger btnDeleteUser" data-id="{{ $user->id }}"
-                                data-name="{{ $user->name }}">
-                                <i class="ti ti-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="text-center text-muted">Belum ada data pengguna.</td>
-                    </tr>
-                    @endforelse
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">
+        <div class="mt-3 d-flex justify-content-center">
             {{ $users->links('pagination::bootstrap-4') }}
         </div>
     </div>
@@ -122,7 +227,7 @@
                         <select class="form-select" id="role" name="role" required>
                             <option value="admin">Admin</option>
                             <option value="owner">Owner</option>
-                            <option value="pelanggan">Pelanggan</option>
+                            <option value="customer">Customer</option>
                         </select>
                     </div>
                     <div class="mb-3 password-field">

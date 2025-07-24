@@ -22,32 +22,61 @@ class OrderSeeder extends Seeder
         }
 
         $statuses = ['pending', 'paid', 'shipped', 'cancelled'];
+        $statusWeights = [
+            'pending' => 15,   // 15% pending
+            'paid' => 25,      // 25% paid  
+            'shipped' => 50,   // 50% shipped (sukses)
+            'cancelled' => 10  // 10% cancelled
+        ];
         
-        // Buat 20 order dengan status berbeda
-        for ($i = 0; $i < 20; $i++) {
+        // Buat 50 order dengan distribusi status yang realistis dalam 6 bulan terakhir
+        for ($i = 0; $i < 50; $i++) {
             $user = $users->random();
-            $product = $products->random();
-            $status = $statuses[array_rand($statuses)];
-            $quantity = rand(1, 50);
-            $price = rand(10000, 100000);
-            $total = $quantity * $price;
             
-            // Buat tanggal random dalam 30 hari terakhir
-            $orderDate = Carbon::now()->subDays(rand(0, 30));
+            // Pilih status berdasarkan probabilitas
+            $rand = rand(1, 100);
+            $cumulative = 0;
+            $selectedStatus = 'pending';
+            foreach ($statusWeights as $status => $weight) {
+                $cumulative += $weight;
+                if ($rand <= $cumulative) {
+                    $selectedStatus = $status;
+                    break;
+                }
+            }
             
+            // Buat tanggal random dalam 180 hari terakhir (6 bulan)
+            $orderDate = Carbon::now()->subDays(rand(1, 180));
+            
+            // Buat order dengan beberapa produk
             $order = Order::create([
                 'user_id' => $user->id,
                 'order_date' => $orderDate,
-                'status' => $status,
-                'total_amount' => $total,
+                'status' => $selectedStatus,
+                'total_amount' => 0, // akan dihitung setelah detail
             ]);
             
-            OrderDetail::create([
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-                'quantity' => $quantity,
-                'price' => $price,
-            ]);
+            // Tambahkan 1-4 produk per order
+            $productCount = rand(1, 4);
+            $orderTotal = 0;
+            
+            for ($j = 0; $j < $productCount; $j++) {
+                $product = $products->random();
+                $quantity = rand(1, 20); // Quantity realistis
+                $sellPrice = $product->price; // Gunakan harga produk sebenarnya
+                $subtotal = $quantity * $sellPrice;
+                $orderTotal += $subtotal;
+                
+                OrderDetail::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => $quantity,
+                    'price' => $sellPrice,
+                ]);
+            }
+            
+            // Update total order
+            $order->update(['total_amount' => $orderTotal]);
         }
     }
 } 

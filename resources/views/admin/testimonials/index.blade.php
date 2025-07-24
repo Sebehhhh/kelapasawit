@@ -1,50 +1,150 @@
 @extends('layouts.app')
-
+@section('title', 'Kelola Testimoni')
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Daftar Testimoni</h4>
-        <button type="button" class="btn btn-primary" id="btnAddTesti">Tambah Testimoni</button>
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                <div class="card-body text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 fw-bold">
+                                <i class="ti ti-message-star me-2"></i>
+                                Kelola Testimoni
+                            </h4>
+                            <p class="mb-0 opacity-75">Manajemen testimoni dan ulasan pelanggan</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-dark" onclick="alert('Fitur export PDF akan segera tersedia')">
+                                <i class="ti ti-file-download me-1"></i> Export PDF
+                            </a>
+                            <button type="button" class="btn btn-dark" id="btnAddTesti">
+                                <i class="ti ti-plus me-1"></i> Tambah Testimoni
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>User</th>
-                        <th>Produk</th>
-                        <th>Pesan</th>
-                        <th>Rating</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($testimonials as $testi)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $testi->user->name ?? '-' }}</td>
-                            <td>{{ $testi->product->name ?? '-' }}</td>
-                            <td>{{ $testi->message }}</td>
-                            <td>{{ $testi->rating }}</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-warning btnEditTesti" data-id="{{ $testi->id }}"
-                                    data-user_id="{{ $testi->user_id }}" data-product_id="{{ $testi->product_id }}"
-                                    data-message="{{ $testi->message }}" data-rating="{{ $testi->rating }}">
-                                    Edit
-                                </button>
-                                <button type="button" class="btn btn-sm btn-danger btnDeleteTesti" data-id="{{ $testi->id }}">Hapus</button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="6" class="text-center">Belum ada testimoni.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-            <div class="mt-3">{{ $testimonials->links() }}</div>
+
+    <!-- Data Table Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="ti ti-list me-2 text-primary"></i>Daftar Testimoni
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <tr>
+                                    <th class="text-center fw-bold" style="width: 60px">#</th>
+                                    <th class="fw-bold"><i class="ti ti-user me-1"></i>User</th>
+                                    <th class="fw-bold"><i class="ti ti-package me-1"></i>Produk</th>
+                                    <th class="fw-bold"><i class="ti ti-message me-1"></i>Pesan</th>
+                                    <th class="fw-bold text-center"><i class="ti ti-star me-1"></i>Rating</th>
+                                    <th class="fw-bold text-center" style="width:120px;"><i class="ti ti-settings me-1"></i>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($testimonials as $testi)
+                                <tr>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark fw-semibold">{{ $loop->iteration }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-info-subtle rounded me-2">
+                                                <i class="ti ti-user text-info"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-semibold">{{ $testi->user->name ?? '-' }}</h6>
+                                                <small class="text-muted">{{ $testi->user->email ?? '' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary-subtle text-primary">
+                                            {{ $testi->product->name ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <div class="avatar-sm bg-warning-subtle rounded me-2 flex-shrink-0">
+                                                <i class="ti ti-message text-warning"></i>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0 text-muted">{{ Str::limit($testi->message, 80) }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                @if($i <= $testi->rating)
+                                                    <i class="ti ti-star-filled text-warning"></i>
+                                                @else
+                                                    <i class="ti ti-star text-muted"></i>
+                                                @endif
+                                            @endfor
+                                            <span class="ms-2 badge bg-warning-subtle text-warning">{{ $testi->rating }}/5</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-primary btn-sm btnEditTesti" data-bs-toggle="tooltip" title="Edit"
+                                                data-id="{{ $testi->id }}" data-user_id="{{ $testi->user_id }}" data-product_id="{{ $testi->product_id }}"
+                                                data-message="{{ $testi->message }}" data-rating="{{ $testi->rating }}">
+                                                <i class="ti ti-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm btnDeleteTesti" data-bs-toggle="tooltip" title="Hapus"
+                                                data-id="{{ $testi->id }}">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="ti ti-message-star text-muted" style="font-size: 3rem;"></i>
+                                            <h6 class="mt-2 text-muted">Belum ada testimoni</h6>
+                                            <p class="text-muted mb-0">Klik tombol "Tambah Testimoni" untuk menambah data</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @if(method_exists($testimonials, 'hasPages') && $testimonials->hasPages())
+                        <div class="card-footer bg-white border-0">
+                            <div class="d-flex justify-content-center">
+                                {{ $testimonials->links('pagination::bootstrap-4') }}
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
 
 <!-- Modal Tambah/Edit Testimoni -->
 <div class="modal fade" id="testiModal" tabindex="-1" aria-labelledby="testiModalLabel" aria-hidden="true">

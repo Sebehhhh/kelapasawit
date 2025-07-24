@@ -1,62 +1,125 @@
 @extends('layouts.app')
 @section('title', 'Kelola Kategori Produk')
 @section('content')
-<div class="row mb-4">
-  <div class="col-12 d-flex justify-content-between align-items-center">
-    <h4 class="fw-bold mb-0">Daftar Kategori Produk</h4>
-    <button type="button" class="btn btn-primary" id="btnAddCategory">
-      <i class="ti ti-plus"></i> Tambah Kategori
-    </button>
-  </div>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 fw-bold">
+                                <i class="ti ti-category me-2"></i>
+                                Kelola Kategori Produk
+                            </h4>
+                            <p class="mb-0 opacity-75">Manajemen kategori produk bibit sawit</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('admin.categories.printReport') }}" class="btn btn-light">
+                                <i class="ti ti-file-download me-1"></i> Export PDF
+                            </a>
+                            <button type="button" class="btn btn-light" id="btnAddCategory">
+                                <i class="ti ti-plus me-1"></i> Tambah Kategori
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="ti ti-list me-2 text-primary"></i>Daftar Kategori
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <tr>
+                                    <th class="text-center fw-bold" style="width: 60px">#</th>
+                                    <th class="fw-bold"><i class="ti ti-tag me-1"></i>Nama Kategori</th>
+                                    <th class="fw-bold"><i class="ti ti-file-text me-1"></i>Deskripsi</th>
+                                    <th class="fw-bold text-center" style="width:120px;"><i class="ti ti-settings me-1"></i>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($categories as $cat)
+                                <tr>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark fw-semibold">{{ $loop->iteration }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary-subtle rounded me-2">
+                                                <i class="ti ti-tag text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-semibold">{{ $cat->name }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">{{ $cat->description ?? '-' }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-primary btn-sm btnEditCategory" data-bs-toggle="tooltip" title="Edit"
+                                                data-id="{{ $cat->id }}"
+                                                data-name="{{ $cat->name }}"
+                                                data-description="{{ $cat->description }}">
+                                                <i class="ti ti-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm btnDeleteCategory" data-bs-toggle="tooltip" title="Hapus"
+                                                data-id="{{ $cat->id }}"
+                                                data-name="{{ $cat->name }}">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="ti ti-category text-muted" style="font-size: 3rem;"></i>
+                                            <h6 class="mt-2 text-muted">Belum ada kategori</h6>
+                                            <p class="text-muted mb-0">Klik tombol "Tambah Kategori" untuk menambah data</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @if(method_exists($categories, 'hasPages') && $categories->hasPages())
+                        <div class="card-footer bg-white border-0">
+                            <div class="d-flex justify-content-center">
+                                {{ $categories->links('pagination::bootstrap-4') }}
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="card border-0 shadow mb-4">
-  <div class="card-body">
-    <div class="table-responsive">
-      <table class="table table-bordered align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>#</th>
-            <th>Nama Kategori</th>
-            <th>Deskripsi</th>
-            {{-- <th>Dibuat</th> --}}
-            <th class="text-center" style="width:120px;">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          @forelse($categories as $cat)
-            <tr>
-              <td>{{ $loop->iteration }}</td>
-              <td>{{ $cat->name }}</td>
-              <td>{{ $cat->description ?? '-' }}</td>
-              {{-- <td>{{ $cat->created_at->format('d M Y') }}</td> --}}
-              <td class="text-center">
-                <button type="button" class="btn btn-sm btn-info btnEditCategory"
-                  data-id="{{ $cat->id }}"
-                  data-name="{{ $cat->name }}"
-                  data-description="{{ $cat->description }}">
-                  <i class="ti ti-edit"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-danger btnDeleteCategory"
-                  data-id="{{ $cat->id }}"
-                  data-name="{{ $cat->name }}">
-                  <i class="ti ti-trash"></i>
-                </button>
-              </td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="5" class="text-center text-muted">Belum ada data kategori.</td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
-    </div>
-    <div class="mt-3">
-      {{ $categories->links() }}
-    </div>
-  </div>
-</div>
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
 
 <!-- Modal Tambah/Edit Kategori -->
 <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">

@@ -2,8 +2,8 @@
     <div class="container">
         <div class="row mb-4">
             <div class="col-12 text-center">
-                <h2 class="fw-bold mb-2"><i class="bi bi-stars text-warning me-2"></i>Fitur Unggulan</h2>
-                <p class="text-muted">Program dan penawaran terbaik untuk Anda, langsung dari UKM kami.</p>
+                <h2 class="fw-bold mb-2"><i class="bi bi-stars text-warning me-2"></i>Difiturkan</h2>
+                <p class="text-muted">Informasi pilihan yang ditampilkan di homepage.</p>
             </div>
         </div>
         <div class="row g-4">

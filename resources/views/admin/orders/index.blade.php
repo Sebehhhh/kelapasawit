@@ -1,135 +1,264 @@
 @extends('layouts.app')
-
+@section('title', 'Kelola Order Masuk')
 @section('content')
 <div class="container-fluid">
-    {{-- Hapus notifikasi sukses/error di sini, cukup di layout utama --}}
-    
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Order Masuk</h4>
-        <div>
-            <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#printModal">
-                <i class="ti ti-file-download"></i> Cetak Laporan
-            </a>
-        </div>
-    </div>
-    <!-- FILTER ORDER -->
-    <div class="card mb-3">
-        <div class="card-body pb-2">
-            <form class="row g-2 align-items-end" method="GET" action="">
-                <div class="col-md-3">
-                    <label for="filter_start_date" class="form-label mb-1">Tanggal Mulai</label>
-                    <input type="date" name="start_date" id="filter_start_date" class="form-control" value="{{ request('start_date') }}">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 fw-bold">
+                                <i class="ti ti-shopping-cart me-2"></i>
+                                Kelola Order Masuk
+                            </h4>
+                            <p class="mb-0 opacity-75">Manajemen pesanan dari pelanggan</p>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <div class="dropdown">
+                                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="ti ti-file-download me-1"></i> Export
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#printModal">
+                                        <i class="ti ti-file-text me-2"></i>Cetak Laporan
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.orders.strukKeluar') }}">
+                                        <i class="ti ti-file-export me-2"></i>Struk Keluar
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.orders.strukMasuk') }}">
+                                        <i class="ti ti-file-import me-2"></i>Struk Masuk
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.orders.salesReport') }}">
+                                        <i class="ti ti-chart-bar me-2"></i>Penjualan Harian
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label for="filter_end_date" class="form-label mb-1">Tanggal Akhir</label>
-                    <input type="date" name="end_date" id="filter_end_date" class="form-control" value="{{ request('end_date') }}">
-                </div>
-                <div class="col-md-2">
-                    <label for="filter_status" class="form-label mb-1">Status</label>
-                    <select name="status" id="filter_status" class="form-select">
-                        <option value="">Semua Status</option>
-                        <option value="pending" @if(isset($selectedStatus) && $selectedStatus=='pending') selected @endif>Pending</option>
-                        <option value="paid" @if(isset($selectedStatus) && $selectedStatus=='paid') selected @endif>Paid</option>
-                        <option value="shipped" @if(isset($selectedStatus) && $selectedStatus=='shipped') selected @endif>Shipped</option>
-                        <option value="cancelled" @if(isset($selectedStatus) && $selectedStatus=='cancelled') selected @endif>Cancelled</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="filter_user" class="form-label mb-1">Nama User</label>
-                    <input type="text" name="user_name" id="filter_user" class="form-control" placeholder="Cari user..." value="{{ $searchUser ?? '' }}">
-                </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-success mt-3">Filter</button>
-                    <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary mt-3">Reset</a>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>User</th>
-                        <th>Tanggal</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Pembayaran</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($orders as $order)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $order->user->name ?? '-' }}</td>
-                            <td>{{ $order->order_date ? $order->order_date->format('d M Y') : '-' }}</td>
-                            <td>Rp{{ number_format($order->total_amount,0,',','.') }}</td>
-                            <td>
-                                <span class="badge 
-                                    @if($order->status == 'pending') bg-warning
-                                    @elseif($order->status == 'paid') bg-success
-                                    @elseif($order->status == 'shipped') bg-primary
-                                    @elseif($order->status == 'cancelled') bg-danger
-                                    @else bg-secondary
-                                    @endif
-                                ">
-                                    {{ ucfirst($order->status) }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($order->payment)
-                                    <span class="badge 
-                                        @if($order->payment->status == 'pending') bg-warning
-                                        @elseif($order->payment->status == 'accepted') bg-success
-                                        @elseif($order->payment->status == 'rejected') bg-danger
-                                        @else bg-secondary
-                                        @endif
-                                    ">
-                                        {{ ucfirst($order->payment->status) }}
-                                    </span>
-                                    @if($order->payment->proof_image)
-                                        <a href="{{ asset('storage/' . $order->payment->proof_image) }}" target="_blank">Bukti</a>
-                                    @endif
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-info btnDetailOrder" data-order='@json($order)'>Detail</button>
-                                @if($order->payment && $order->payment->status == 'pending')
-                                    <form method="POST" action="{{ route('admin.payments.validate', $order->payment->id) }}" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="action" value="accept">
-                                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Setujui pembayaran ini?')">Setujui</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.payments.validate', $order->payment->id) }}" class="d-inline ms-1">
-                                        @csrf
-                                        <input type="hidden" name="action" value="reject">
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tolak pembayaran ini?')">Tolak</button>
-                                    </form>
-                                @endif
-                                @if($order->status == 'paid')
-                                    <form method="POST" action="{{ route('admin.orders.update', $order->id) }}" class="d-inline ms-1">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" name="status" value="shipped">
-                                        <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Kirim order ini?')">Kirim</button>
-                                    </form>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="7" class="text-center">Belum ada order.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-            <div class="mt-3 d-flex justify-content-center">
-                {{ $orders->links('pagination::bootstrap-4') }}
             </div>
         </div>
     </div>
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="ti ti-filter me-2 text-primary"></i>Filter & Pencarian
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form class="row g-3 align-items-end" method="GET" action="">
+                        <div class="col-md-3">
+                            <label for="filter_start_date" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-calendar me-1 text-primary"></i> Tanggal Mulai
+                            </label>
+                            <input type="date" name="start_date" id="filter_start_date" class="form-control" value="{{ request('start_date') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_end_date" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-calendar me-1 text-primary"></i> Tanggal Akhir
+                            </label>
+                            <input type="date" name="end_date" id="filter_end_date" class="form-control" value="{{ request('end_date') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="filter_status" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-info-circle me-1 text-primary"></i> Status
+                            </label>
+                            <select name="status" id="filter_status" class="form-select">
+                                <option value="">Semua Status</option>
+                                <option value="pending" @if(isset($selectedStatus) && $selectedStatus=='pending') selected @endif>Pending</option>
+                                <option value="paid" @if(isset($selectedStatus) && $selectedStatus=='paid') selected @endif>Paid</option>
+                                <option value="shipped" @if(isset($selectedStatus) && $selectedStatus=='shipped') selected @endif>Shipped</option>
+                                <option value="cancelled" @if(isset($selectedStatus) && $selectedStatus=='cancelled') selected @endif>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="filter_user" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-user me-1 text-primary"></i> Nama User
+                            </label>
+                            <input type="text" name="user_name" id="filter_user" class="form-control" placeholder="Cari user..." value="{{ $searchUser ?? '' }}">
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ti ti-search me-1"></i> Filter
+                            </button>
+                            <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary">
+                                <i class="ti ti-refresh me-1"></i> Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Data Table Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="ti ti-list me-2 text-primary"></i>Daftar Order
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <tr>
+                                    <th class="text-center fw-bold" style="width: 60px">#</th>
+                                    <th class="fw-bold"><i class="ti ti-user me-1"></i>User</th>
+                                    <th class="fw-bold"><i class="ti ti-calendar me-1"></i>Tanggal</th>
+                                    <th class="fw-bold text-end"><i class="ti ti-currency-dollar me-1"></i>Total</th>
+                                    <th class="fw-bold text-center"><i class="ti ti-info-circle me-1"></i>Status</th>
+                                    <th class="fw-bold text-center"><i class="ti ti-credit-card me-1"></i>Pembayaran</th>
+                                    <th class="fw-bold text-center" style="width:120px;"><i class="ti ti-settings me-1"></i>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($orders as $order)
+                                <tr>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark fw-semibold">{{ $loop->iteration }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-info-subtle rounded me-2">
+                                                <i class="ti ti-user text-info"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-semibold">{{ $order->user->name ?? '-' }}</h6>
+                                                <small class="text-muted">{{ $order->user->email ?? '' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info-subtle text-info">
+                                            <i class="ti ti-calendar me-1"></i>
+                                            {{ $order->order_date ? $order->order_date->format('d/m/Y') : '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="fw-bold text-success">
+                                            Rp {{ number_format($order->total_amount, 0, ',', '.') }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge 
+                                            @if($order->status == 'pending') bg-warning-subtle text-warning
+                                            @elseif($order->status == 'paid') bg-success-subtle text-success
+                                            @elseif($order->status == 'shipped') bg-primary-subtle text-primary
+                                            @elseif($order->status == 'cancelled') bg-danger-subtle text-danger
+                                            @else bg-secondary-subtle text-secondary
+                                            @endif
+                                        ">
+                                            @if($order->status == 'pending')
+                                                <i class="ti ti-clock me-1"></i>
+                                            @elseif($order->status == 'paid')
+                                                <i class="ti ti-check me-1"></i>
+                                            @elseif($order->status == 'shipped')
+                                                <i class="ti ti-truck me-1"></i>
+                                            @elseif($order->status == 'cancelled')
+                                                <i class="ti ti-x me-1"></i>
+                                            @endif
+                                            {{ ucfirst($order->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if($order->payment)
+                                            <div class="d-flex flex-column align-items-center gap-1">
+                                                <span class="badge 
+                                                    @if($order->payment->status == 'pending') bg-warning-subtle text-warning
+                                                    @elseif($order->payment->status == 'accepted') bg-success-subtle text-success
+                                                    @elseif($order->payment->status == 'rejected') bg-danger-subtle text-danger
+                                                    @else bg-secondary-subtle text-secondary
+                                                    @endif
+                                                ">
+                                                    {{ ucfirst($order->payment->status) }}
+                                                </span>
+                                                @if($order->payment->proof_image)
+                                                    <a href="{{ asset('storage/' . $order->payment->proof_image) }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                        <i class="ti ti-photo"></i> Bukti
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-info btn-sm btnDetailOrder" data-bs-toggle="tooltip" title="Detail" data-order='@json($order)'>
+                                                <i class="ti ti-eye"></i>
+                                            </button>
+                                            @if($order->payment && $order->payment->status == 'pending')
+                                                <form method="POST" action="{{ route('admin.payments.validate', $order->payment->id) }}" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="action" value="accept">
+                                                    <button type="submit" class="btn btn-outline-success btn-sm" data-bs-toggle="tooltip" title="Setujui" onclick="return confirm('Setujui pembayaran ini?')">
+                                                        <i class="ti ti-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ route('admin.payments.validate', $order->payment->id) }}" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="action" value="reject">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" title="Tolak" onclick="return confirm('Tolak pembayaran ini?')">
+                                                        <i class="ti ti-x"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            @if($order->status == 'paid')
+                                                <form method="POST" action="{{ route('admin.orders.update', $order->id) }}" class="d-inline">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="shipped">
+                                                    <button type="submit" class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" title="Kirim" onclick="return confirm('Kirim order ini?')">
+                                                        <i class="ti ti-truck"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="ti ti-shopping-cart text-muted" style="font-size: 3rem;"></i>
+                                            <h6 class="mt-2 text-muted">Belum ada order</h6>
+                                            <p class="text-muted mb-0">Order dari pelanggan akan muncul di sini</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @if(method_exists($orders, 'hasPages') && $orders->hasPages())
+                        <div class="card-footer bg-white border-0">
+                            <div class="d-flex justify-content-center">
+                                {{ $orders->links('pagination::bootstrap-4') }}
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
 </div>
 
 <!-- Modal Detail Order -->

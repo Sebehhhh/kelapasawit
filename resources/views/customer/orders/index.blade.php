@@ -4,139 +4,252 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
 @endpush
 @section('content')
-<div class="row mb-4">
+{{-- Hero Header Section --}}
+<div class="row mb-5">
     <div class="col-12">
-        <h4 class="fw-bold mb-0">Pesanan Saya</h4>
-        <span class="text-muted">Riwayat dan status pesanan Anda.</span>
+        <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%); min-height: 150px;">
+            <div class="card-body d-flex align-items-center text-white">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="avatar-circle bg-white bg-opacity-20 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border-radius: 50%;">
+                            <i class="ti ti-shopping-bag fs-2 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-1">Pesanan Saya</h3>
+                            <p class="mb-0 opacity-90">Kelola dan pantau status pesanan Anda</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="card border-0 shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Tanggal Order</th>
-                        <th>Status</th>
-                        <th>Produk</th>
-                        <th>Qty</th>
-                        <th>Total</th>
-                        <th class="text-center" style="width:120px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($orders as $order)
-                    @php
-                    $detail = $order->details->first(); // Asumsi satu produk per order (bisa di-loop kalau multi)
-                    @endphp
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $order->order_date->format('d M Y H:i') }}</td>
-                        <td>
+{{-- Orders Cards Section --}}
+<div class="row g-4">
+    @forelse($orders as $order)
+    @php
+    $detail = $order->details->first();
+    @endphp
+    <div class="col-12">
+        <div class="card border-0 shadow-sm order-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    {{-- Product Image --}}
+                    <div class="col-md-2 col-3 text-center">
+                        @if($detail && $detail->product)
+                        <img src="{{ $detail->product->image ? asset('storage/products/'.$detail->product->image) : asset('assets/images/no-image.png') }}" 
+                             alt="{{ $detail->product->name }}" 
+                             class="img-fluid rounded" 
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                        @else
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="ti ti-package text-muted fs-2"></i>
+                        </div>
+                        @endif
+                    </div>
+                    
+                    {{-- Order Info --}}
+                    <div class="col-md-6 col-9">
+                        <div class="d-flex align-items-center mb-2">
+                            <h5 class="fw-bold mb-0 me-2">
+                                @if($detail && $detail->product)
+                                    {{ $detail->product->name }}
+                                @else
+                                    Produk tidak tersedia
+                                @endif
+                            </h5>
                             <span class="badge bg-{{ 
-                                    $order->status == 'pending' ? 'warning' : (
-                                    $order->status == 'paid' ? 'success' : (
-                                    $order->status == 'shipped' ? 'info' : 'secondary')) }}">
-                                {{ ucfirst($order->status) }}
+                                $order->status == 'pending' ? 'warning' : (
+                                $order->status == 'paid' ? 'info' : (
+                                $order->status == 'shipped' ? 'success' : (
+                                $order->status == 'cancelled' ? 'danger' : 'secondary'))) }}">
+                                @if($order->status == 'cancelled')
+                                    Dibatalkan
+                                @elseif($order->status == 'pending')
+                                    Menunggu Pembayaran
+                                @elseif($order->status == 'paid')
+                                    Sudah Dibayar
+                                @elseif($order->status == 'shipped')
+                                    Selesai
+                                @else
+                                    {{ ucfirst($order->status) }}
+                                @endif
                             </span>
-                        </td>
-                        <td>
-                            @if($detail)
-                            <strong>{{ $detail->product->name }}</strong>
-                            @else
-                            <span class="text-muted small">-</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if($detail)
-                            {{ $detail->quantity }}
-                            @else
-                            <span class="text-muted small">-</span>
-                            @endif
-                        </td>
-                        <td>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-sm btn-info btn-order-detail" data-order='@json($order)'
-                                data-detail='@json($detail)' data-product='@json($detail ? $detail->product : null)'>
-                                <i class="ti ti-search"></i>
-                            </a>
+                        </div>
+                        
+                        <div class="row text-muted small mb-2">
+                            <div class="col-6">
+                                <i class="ti ti-calendar me-1"></i>
+                                {{ $order->order_date->format('d M Y, H:i') }}
+                            </div>
+                            <div class="col-6">
+                                <i class="ti ti-package me-1"></i>
+                                Qty: {{ $detail ? $detail->quantity : 0 }}
+                            </div>
+                        </div>
+                        
+                        @if($order->status == 'cancelled' && $order->payment && $order->payment->status == 'rejected')
+                        <div class="alert alert-danger py-2 mb-0">
+                            <i class="ti ti-alert-circle me-1"></i>
+                            <small>Pembayaran ditolak</small>
+                        </div>
+                        @endif
+                    </div>
+                    
+                    {{-- Price & Actions --}}
+                    <div class="col-md-4 col-12 text-md-end mt-3 mt-md-0">
+                        <div class="mb-3">
+                            <div class="text-muted small">Total Pembayaran</div>
+                            <div class="fw-bold text-primary fs-5">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</div>
+                        </div>
+                        
+                        <div class="d-flex flex-wrap gap-2">
+                            {{-- Detail Button --}}
+                            <button class="btn btn-sm btn-outline-info btn-order-detail" 
+                                    data-order='@json($order)'
+                                    data-detail='@json($detail)' 
+                                    data-product='@json($detail ? $detail->product : null)'>
+                                <i class="ti ti-eye me-1"></i>Detail
+                            </button>
+                            
+                            {{-- Payment Button --}}
                             @if($order->status === 'pending')
                             <button type="button" class="btn btn-sm btn-success btn-pay-order"
-                                data-order-id="{{ $order->id }}" data-total="{{ $order->total_amount }}">
-                                <i class="ti ti-credit-card"></i> Bayar
+                                    data-order-id="{{ $order->id }}" 
+                                    data-total="{{ $order->total_amount }}">
+                                <i class="ti ti-credit-card me-1"></i>Bayar Sekarang
                             </button>
                             @endif
+                            
+                            {{-- Testimonial Button --}}
                             @if($order->status === 'shipped' && $detail && $detail->product && !$detail->testimonial)
-                            <button type="button" class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#modalGiveTestimonial{{ $detail->id }}">
-                                <i class="ti ti-star"></i> Beri Testimoni
+                            <button type="button" class="btn btn-sm btn-warning" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalGiveTestimonial{{ $detail->id }}">
+                                <i class="ti ti-star me-1"></i>Beri Testimoni
                             </button>
                             @endif
-                        </td>
-                    </tr>
-                    @if($order->status === 'shipped' && $detail && $detail->product && !$detail->testimonial)
-                    <!-- Modal Testimoni per order detail -->
-                    <div class="modal fade" id="modalGiveTestimonial{{ $detail->id }}" tabindex="-1" aria-labelledby="modalGiveTestimonialLabel{{ $detail->id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <form id="formTestimoni{{ $detail->id }}" autocomplete="off" method="POST" action="{{ route('customer.testimonials.store') }}">
-                                @csrf
-                                <input type="hidden" name="order_detail_id" value="{{ $detail->id }}">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title fw-bold" id="modalGiveTestimonialLabel{{ $detail->id }}">Beri Testimoni</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="mb-2">
-                                            <label class="form-label">Produk</label>
-                                            <input type="text" class="form-control" value="{{ $detail->product->name }}" readonly>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Rating</label>
-                                            <select name="rating" class="form-select" required>
-                                                @for($i=1;$i<=5;$i++)
-                                                    <option value="{{ $i }}">{{ $i }} Bintang</option>
-                                                @endfor
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Komentar</label>
-                                            <textarea name="message" class="form-control" rows="3" maxlength="1000" required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <button type="submit" class="btn btn-warning">Kirim Testimoni</button>
-                                    </div>
-                                </div>
-                            </form>
                         </div>
                     </div>
-                    @endif
-                    @empty
-                    <tr>
-                        <td colspan="7" class="text-center text-muted">Belum ada pesanan.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
-        <div class="mt-3">
+    </div>
+    
+    {{-- Testimonial Modal per order --}}
+    @if($order->status === 'shipped' && $detail && $detail->product && !$detail->testimonial)
+    <div class="modal fade" id="modalGiveTestimonial{{ $detail->id }}" tabindex="-1" aria-labelledby="modalGiveTestimonialLabel{{ $detail->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="formTestimoni{{ $detail->id }}" autocomplete="off" method="POST" action="{{ route('customer.testimonials.store') }}">
+                @csrf
+                <input type="hidden" name="order_detail_id" value="{{ $detail->id }}">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-white">
+                        <h5 class="modal-title fw-bold" id="modalGiveTestimonialLabel{{ $detail->id }}">
+                            <i class="ti ti-star me-2"></i>Beri Testimoni
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <img src="{{ $detail->product->image ? asset('storage/products/'.$detail->product->image) : asset('assets/images/no-image.png') }}" 
+                                 alt="{{ $detail->product->name }}" 
+                                 class="img-fluid rounded" 
+                                 style="width: 100px; height: 100px; object-fit: cover;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Produk</label>
+                            <input type="text" class="form-control" value="{{ $detail->product->name }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Rating</label>
+                            <select name="rating" class="form-select" required>
+                                <option value="">Pilih Rating</option>
+                                @for($i=1;$i<=5;$i++)
+                                    <option value="{{ $i }}">{{ $i }} Bintang {!! str_repeat('⭐', $i) !!}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Komentar</label>
+                            <textarea name="message" class="form-control" rows="4" maxlength="1000" placeholder="Bagikan pengalaman Anda dengan produk ini..." required></textarea>
+                            <div class="form-text">Maksimal 1000 karakter</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="ti ti-send me-1"></i>Kirim Testimoni
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
+    
+    @empty
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="ti ti-shopping-bag-off fs-1 text-muted mb-3"></i>
+                <h5 class="text-muted mb-2">Belum Ada Pesanan</h5>
+                <p class="text-muted mb-3">Anda belum memiliki pesanan apapun</p>
+                <a href="{{ route('customer.products.index') }}" class="btn btn-primary">
+                    <i class="ti ti-shopping-cart me-1"></i>Mulai Berbelanja
+                </a>
+            </div>
+        </div>
+    </div>
+    @endforelse
+</div>
+
+{{-- Pagination --}}
+@if($orders->hasPages())
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-center">
             {{ $orders->links('pagination::bootstrap-4') }}
         </div>
     </div>
 </div>
+@endif
+
+{{-- Legacy table structure removed --}}
+<div class="d-none">
+    <div class="card border-0 shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Tanggal Order</th>
+                            <th>Status</th>
+                            <th>Produk</th>
+                            <th>Qty</th>
+                            <th>Total</th>
+                            <th class="text-center" style="width:120px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {{-- Modal Detail Pesanan --}}
 <div class="modal fade" id="modalOrderDetail" tabindex="-1" aria-labelledby="modalOrderDetailLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="modalOrderDetailLabel">Detail Pesanan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="modalOrderDetailLabel">
+                    <i class="ti ti-file-text me-2"></i>Detail Pesanan
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body row" id="orderDetailBody">
+            <div class="modal-body" id="orderDetailBody">
                 <!-- Isi via JS -->
             </div>
         </div>
@@ -150,36 +263,63 @@
             @csrf
             <input type="hidden" name="order_id" id="payOrderId">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="modalPayOrderLabel">Upload Bukti Pembayaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="modalPayOrderLabel">
+                        <i class="ti ti-credit-card me-2"></i>Upload Bukti Pembayaran
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nominal Transfer (Rp)</label>
-                        <input type="number" min="1000" class="form-control" id="payAmount" name="amount_paid" required
-                            readonly>
+                    <div class="alert alert-info">
+                        <i class="ti ti-info-circle me-2"></i>
+                        <strong>Informasi Pembayaran:</strong><br>
+                        Silakan transfer ke rekening yang tersedia dan upload bukti pembayaran
                     </div>
+                    
                     <div class="mb-3">
-                        <label class="form-label">Metode Pembayaran</label>
+                        <label class="form-label fw-semibold">Total Tagihan</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" min="1000" class="form-control fw-bold" id="payAmount" name="amount_paid" required readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Metode Pembayaran</label>
                         <select name="payment_method" class="form-select" required>
-                            <option value="">Pilih Metode...</option>
-                            <option value="bank_transfer">Transfer Bank</option>
-                            <option value="ewallet">E-Wallet</option>
+                            <option value="">Pilih Metode Pembayaran</option>
+                            <option value="bank_transfer">🏦 Transfer Bank</option>
+                            <option value="ewallet">💳 E-Wallet (OVO, DANA, GoPay)</option>
                         </select>
                     </div>
+                    
                     <div class="mb-3">
-                        <label class="form-label">Bukti Pembayaran <span class="text-danger">*</span></label>
-                        <input type="file" accept="image/*,application/pdf" class="form-control" name="proof_image"
-                            required>
-                        <div class="form-text">Format JPG/PNG/PDF, max 2MB.</div>
+                        <label class="form-label fw-semibold">Bukti Pembayaran <span class="text-danger">*</span></label>
+                        <input type="file" accept="image/*,application/pdf" class="form-control" name="proof_image" required>
+                        <div class="form-text">
+                            <i class="ti ti-upload me-1"></i>
+                            Format yang diterima: JPG, PNG, PDF (Maksimal 2MB)
+                        </div>
                     </div>
-                    <div class="mb-2 fw-bold">Total Tagihan: Rp <span id="payOrderTotal"></span></div>
-                    <div id="payOrderAlert" class="alert alert-danger d-none"></div>
+                    
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">Total yang harus dibayar:</span>
+                                <span class="fw-bold text-success fs-5">Rp <span id="payOrderTotal"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="payOrderAlert" class="alert alert-danger d-none mt-3"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success">Kirim Pembayaran</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ti ti-x me-1"></i>Batal
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="ti ti-send me-1"></i>Kirim Pembayaran
+                    </button>
                 </div>
             </div>
         </form>
@@ -234,17 +374,67 @@
         let detail = this.dataset.detail ? JSON.parse(this.dataset.detail) : null;
         let product = this.dataset.product ? JSON.parse(this.dataset.product) : null;
         let html = `
-            <div class="col-md-5 text-center mb-3">
-                <img src="${product && product.image ? '/storage/products/' + product.image : '/assets/images/no-image.png'}" class="img-fluid" style="max-height:180px;object-fit:contain;">
-            </div>
-            <div class="col-md-7">
-                <h5 class="fw-bold mb-1">${product ? product.name : '-'}</h5>
-                <div class="mb-1 text-muted">${product && product.category ? product.category.name : ''}</div>
-                <div class="mb-3">Jumlah: <strong>${detail ? detail.quantity : '-'}</strong></div>
-                <div class="mb-2">Harga: <strong>Rp ${detail ? Number(detail.price).toLocaleString('id-ID') : '-'}</strong></div>
-                <div class="mb-2">Total: <strong>Rp ${order.total_amount ? Number(order.total_amount).toLocaleString('id-ID') : '-'}</strong></div>
-                <div class="mb-2">Status: <span class="badge bg-${order.status == 'pending' ? 'warning' : (order.status == 'paid' ? 'success' : (order.status == 'shipped' ? 'info' : 'secondary'))}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span></div>
-                <div class="mb-2">Tanggal Order: ${order.order_date ? (new Date(order.order_date)).toLocaleString('id-ID') : '-'}</div>
+            <div class="row">
+                <div class="col-md-4 text-center mb-3">
+                    <img src="${product && product.image ? '/storage/products/' + product.image : '/assets/images/no-image.png'}" 
+                         class="img-fluid rounded shadow-sm" 
+                         style="max-height:200px;object-fit:cover;border: 2px solid #e9ecef;">
+                </div>
+                <div class="col-md-8">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h4 class="fw-bold mb-3 text-primary">${product ? product.name : 'Produk tidak tersedia'}</h4>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Kategori</small>
+                                    <div class="fw-semibold">${product && product.category ? product.category.name : 'Tidak ada kategori'}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Jumlah</small>
+                                    <div class="fw-semibold">${detail ? detail.quantity : 0} pcs</div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Harga Satuan</small>
+                                    <div class="fw-bold text-success">Rp ${detail ? Number(detail.price).toLocaleString('id-ID') : '0'}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Total Harga</small>
+                                    <div class="fw-bold text-primary fs-5">Rp ${order.total_amount ? Number(order.total_amount).toLocaleString('id-ID') : '0'}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Status Pesanan</small>
+                                    <div>
+                                        <span class="badge bg-${order.status == 'pending' ? 'warning' : (order.status == 'paid' ? 'info' : (order.status == 'shipped' ? 'success' : (order.status == 'cancelled' ? 'danger' : 'secondary')))} fs-6">
+                                            ${order.status == 'cancelled' ? 'Dibatalkan' : 
+                                              order.status == 'pending' ? 'Menunggu Pembayaran' :
+                                              order.status == 'paid' ? 'Sudah Dibayar' :
+                                              order.status == 'shipped' ? 'Selesai' :
+                                              order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Tanggal Order</small>
+                                    <div class="fw-semibold">${order.order_date ? (new Date(order.order_date)).toLocaleDateString('id-ID', {
+                                        weekday: 'long', 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) : 'Tidak diketahui'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
         document.getElementById('orderDetailBody').innerHTML = html;
@@ -314,9 +504,62 @@
         alert.classList.remove('d-none');
     }
 </script>
+@push('styles')
+<style>
+.order-card {
+    transition: all 0.3s ease;
+    border-radius: 12px !important;
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.avatar-circle {
+    backdrop-filter: blur(10px);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.order-card {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+}
+
+@media (max-width: 768px) {
+    .order-card .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+@endpush
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// Add stagger animation to order cards
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.order-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+});
+
 // Modal Testimoni
 let testiModal = new bootstrap.Modal(document.getElementById('modalGiveTestimonial'));
 document.querySelectorAll('.btn-give-testimonial').forEach(btn => {
@@ -329,6 +572,7 @@ document.querySelectorAll('.btn-give-testimonial').forEach(btn => {
         testiModal.show();
     });
 });
+
 // Rating bintang
 function setRating(val) {
     document.getElementById('testiRatingValue').value = val;
@@ -341,43 +585,49 @@ document.querySelectorAll('#testiRating .rating-star').forEach(star => {
         setRating(Number(this.dataset.value));
     });
 });
+
 // Submit Testimoni
 const formTestimoni = document.getElementById('formTestimoni');
-formTestimoni.onsubmit = function(e) {
-    e.preventDefault();
-    let btn = this.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    let formData = new FormData(this);
-    fetch("{{ route('customer.testimonials.store') }}", {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: formData,
-        credentials: 'same-origin'
-    })
-    .then(async response => {
-        btn.disabled = false;
-        let data = await response.text();
-        try { data = JSON.parse(data); } catch {}
-        if(response.ok && (!data.error)){
-            testiModal.hide();
-            Swal.fire('Berhasil!', data.message || 'Testimoni berhasil dikirim!', 'success').then(() => {
-                window.location.reload();
-            });
-        } else {
-            showTestiError(data.message || data.error || 'Gagal mengirim testimoni!');
-        }
-    })
-    .catch(error => {
-        btn.disabled = false;
-        showTestiError('Gagal terhubung ke server!');
-    });
-};
+if(formTestimoni) {
+    formTestimoni.onsubmit = function(e) {
+        e.preventDefault();
+        let btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        let formData = new FormData(this);
+        fetch("{{ route('customer.testimonials.store') }}", {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: formData,
+            credentials: 'same-origin'
+        })
+        .then(async response => {
+            btn.disabled = false;
+            let data = await response.text();
+            try { data = JSON.parse(data); } catch {}
+            if(response.ok && (!data.error)){
+                testiModal.hide();
+                Swal.fire('Berhasil!', data.message || 'Testimoni berhasil dikirim!', 'success').then(() => {
+                    window.location.reload();
+                });
+            } else {
+                showTestiError(data.message || data.error || 'Gagal mengirim testimoni!');
+            }
+        })
+        .catch(error => {
+            btn.disabled = false;
+            showTestiError('Gagal terhubung ke server!');
+        });
+    };
+}
+
 function showTestiError(msg){
     let alert = document.getElementById('testiAlert');
-    alert.innerText = msg;
-    alert.classList.remove('d-none');
+    if(alert) {
+        alert.innerText = msg;
+        alert.classList.remove('d-none');
+    }
 }
 </script>
 @endpush

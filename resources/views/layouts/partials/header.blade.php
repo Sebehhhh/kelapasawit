@@ -12,25 +12,28 @@
     <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
       <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
         <li class="nav-item dropdown">
-          <a class="nav-link" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" href="#" id="drop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <img src="{{ asset('assets/images/profile/user-1.jpg') }}" alt="Foto Profil" width="35" height="35"
               class="rounded-circle">
           </a>
-          <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-            <div class="message-body">
-              {{-- Profil sementara disembunyikan --}}
-              <a href="{{ auth()->user()->role === 'customer' ? route('customer.profile.edit') : route('admin.profile.edit') }}" class="d-flex align-items-center gap-2 dropdown-item">
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="drop2">
+            <li>
+              <a href="{{ auth()->user()->role === 'customer' ? route('customer.profile.edit') : route('admin.profile.edit') }}" class="dropdown-item d-flex align-items-center gap-2">
                 <i class="ti ti-user fs-6"></i>
-                <p class="mb-0 fs-3">Profil Saya</p>
+                <span>Profil Saya</span>
               </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
               <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
               </form>
-              <button type="button" class="btn btn-outline-primary mx-3 mt-2 d-block" id="logout-btn">
-                Logout
+              <button type="button" class="dropdown-item d-flex align-items-center gap-2" id="logout-btn">
+                <i class="ti ti-logout fs-6"></i>
+                <span>Logout</span>
               </button>
-            </div>
-          </div>
+            </li>
+          </ul>
         </li>
       </ul>
     </div>
@@ -42,6 +45,11 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Initialize Bootstrap dropdowns
+    const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+    const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl));
+    
+    // Logout functionality
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', function () {

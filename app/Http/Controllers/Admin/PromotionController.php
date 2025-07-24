@@ -40,8 +40,16 @@ class PromotionController extends Controller
             'product_id' => 'required|exists:products,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
+            'discount_type' => 'required|in:percentage,fixed',
+            'discount_value' => 'required|numeric|min:0',
+            'min_purchase' => 'nullable|numeric|min:0',
+            'max_discount' => 'nullable|numeric|min:0',
+            'is_active' => 'boolean',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        // Set default for is_active if not provided
+        $validated['is_active'] = $request->has('is_active') ? true : false;
 
         if ($request->hasFile('image')) {
             $filename = uniqid() . '_' . $request->file('image')->getClientOriginalName();
@@ -86,8 +94,16 @@ class PromotionController extends Controller
             'product_id' => 'required|exists:products,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
+            'discount_type' => 'required|in:percentage,fixed',
+            'discount_value' => 'required|numeric|min:0',
+            'min_purchase' => 'nullable|numeric|min:0',
+            'max_discount' => 'nullable|numeric|min:0',
+            'is_active' => 'boolean',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        // Set default for is_active if not provided
+        $validated['is_active'] = $request->has('is_active') ? true : false;
         if ($request->hasFile('image')) {
             if ($promotion->image && Storage::disk('public')->exists('promotions/' . $promotion->image)) {
                 Storage::disk('public')->delete('promotions/' . $promotion->image);
@@ -124,5 +140,38 @@ class PromotionController extends Controller
     {
         $products = Product::select('id', 'name')->get();
         return response()->json($products);
+    }
+
+    // Report Produk Difiturkan
+    public function printReport(Request $request)
+    {
+        $query = Promotion::with('product');
+        
+        // Filter berdasarkan tanggal
+        if ($request->start_date) {
+            $query->where('start_date', '>=', $request->start_date);
+        }
+        if ($request->end_date) {
+            $query->where('end_date', '<=', $request->end_date);
+        }
+        
+        // Filter berdasarkan status aktif
+        if ($request->status === 'active') {
+            $query->where('start_date', '<=', now())
+                  ->where('end_date', '>=', now());
+        } elseif ($request->status === 'expired') {
+            $query->where('end_date', '<', now());
+        }
+        
+        $promotions = $query->orderByDesc('created_at')->get();
+        
+        // Hitung total produk yang difiturkan
+        $totalFeatured = $promotions->count();
+        $activeFeatured = $promotions->filter(function($promo) {
+            return $promo->start_date <= now() && $promo->end_date >= now();
+        })->count();
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.promotions.report-pdf', compact('promotions', 'totalFeatured', 'activeFeatured'));
+        return $pdf->download('laporan-produk-difiturkan-' . date('Y-m-d') . '.pdf');
     }
 }

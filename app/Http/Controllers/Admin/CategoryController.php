@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CategoryController extends Controller
 {
@@ -64,5 +65,12 @@ class CategoryController extends Controller
         $category->delete();
 
         return response()->json(['message' => 'Kategori berhasil dihapus.']);
+    }
+
+    public function printReport(Request $request)
+    {
+        $categories = \App\Models\Category::withCount('products')->get();
+        $pdf = Pdf::loadView('admin.categories.report-pdf', compact('categories'));
+        return $pdf->download('laporan-kategori-sawit-' . date('Y-m-d') . '.pdf');
     }
 }

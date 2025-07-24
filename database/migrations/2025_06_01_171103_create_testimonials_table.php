@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id(); // id (PK)
             $table->unsignedBigInteger('user_id');    // FK ke users
             $table->unsignedBigInteger('product_id'); // FK ke products
+            $table->unsignedBigInteger('order_detail_id')->nullable();
             $table->text('message');
             $table->tinyInteger('rating')->unsigned()->default(5); // 1-5
             $table->timestamps();
@@ -22,6 +23,7 @@ return new class extends Migration
             // Foreign Key Constraints
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('order_detail_id')->references('id')->on('order_details')->onDelete('set null');
         });
     }
 

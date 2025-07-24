@@ -1,120 +1,230 @@
 @extends('layouts.app')
 @section('title', 'Kelola Produk Bibit Sawit')
 @section('content')
-<div class="row mb-4">
-    <div class="col-12 d-flex justify-content-between align-items-center">
-        <h4 class="fw-bold mb-0">Daftar Produk</h4>
-        <div>
-            <a href="{{ route('admin.products.printReport', request()->all()) }}" target="_blank" class="btn btn-success me-2">
-                <i class="ti ti-printer"></i> Cetak PDF
-            </a>
-            <button type="button" class="btn btn-primary" id="btnAddProduct">
-                <i class="ti ti-plus"></i> Tambah Produk
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- FILTER PRODUK -->
-<div class="card border-0 shadow mb-4">
-    <div class="card-body pb-2">
-        <form class="row g-2 align-items-end" method="GET" action="">
-            <div class="col-md-3">
-                <label for="filter_category" class="form-label mb-1">Kategori</label>
-                <select name="category_id" id="filter_category" class="form-select">
-                    <option value="">-- Semua Kategori --</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}" @if(isset($selectedCategory) && $selectedCategory == $cat->id) selected @endif>{{ $cat->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="filter_name" class="form-label mb-1">Nama Produk</label>
-                <input type="text" name="name" id="filter_name" class="form-control" placeholder="Cari nama produk..." value="{{ $searchName ?? '' }}">
-            </div>
-            <div class="col-md-2">
-                <label for="sort_by" class="form-label mb-1">Urutkan</label>
-                <select name="sort_by" id="sort_by" class="form-select">
-                    <option value="">Tanggal Terbaru</option>
-                    <option value="price" @if(isset($sortBy) && $sortBy=='price') selected @endif>Harga</option>
-                    <option value="stock" @if(isset($sortBy) && $sortBy=='stock') selected @endif>Stok</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="sort_order" class="form-label mb-1">Urutan</label>
-                <select name="sort_order" id="sort_order" class="form-select">
-                    <option value="desc" @if(isset($sortOrder) && $sortOrder=='desc') selected @endif>Terbesar</option>
-                    <option value="asc" @if(isset($sortOrder) && $sortOrder=='asc') selected @endif>Terkecil</option>
-                </select>
-            </div>
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-success mt-3">Filter</button>
-                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary mt-3">Reset</a>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="card border-0 shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Kategori</th>
-                        <th>Nama Produk</th>
-                        <th>Deskripsi</th>
-                        <th>Harga</th>
-                        <th>Stok</th>
-                        <th>Gambar</th>
-                        <th class="text-center" style="width:120px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($products as $product)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $product->category->name ?? '-' }}</td>
-                        <td>{{ $product->name }}</td>
-                        <td>{{ $product->description ?? '-' }}</td>
-                        <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
-                        <td>{{ $product->stock }}</td>
-                        <td>
-                            @if($product->image)
-                            <img src="{{ asset('storage/products/' . $product->image) }}" alt="Foto" width="60">
-                            @else
-                            <span class="text-muted small">-</span>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-info btnEditProduct"
-                                data-id="{{ $product->id }}" data-category="{{ $product->category_id }}"
-                                data-name="{{ $product->name }}" data-description="{{ $product->description }}"
-                                data-price="{{ $product->price }}" data-stock="{{ $product->stock }}"
-                                data-image="{{ $product->image }}">
-                                <i class="ti ti-edit"></i>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1 fw-bold">
+                                <i class="ti ti-package me-2"></i>
+                                Kelola Produk Bibit Sawit
+                            </h4>
+                            <p class="mb-0 opacity-75">Manajemen produk bibit kelapa sawit</p>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <div class="dropdown">
+                                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="ti ti-file-download me-1"></i> Export
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ route('admin.products.printReport', request()->all()) }}" target="_blank">
+                                        <i class="ti ti-file-text me-2"></i>Laporan Produk
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.products.stokReport') }}">
+                                        <i class="ti ti-clipboard-data me-2"></i>Laporan Stok
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.products.topProductsReport') }}">
+                                        <i class="ti ti-star me-2"></i>Produk Terlaris
+                                    </a></li>
+                                </ul>
+                            </div>
+                            <button type="button" class="btn btn-light" id="btnAddProduct">
+                                <i class="ti ti-plus me-1"></i> Tambah Produk
                             </button>
-                            <button type="button" class="btn btn-sm btn-danger btnDeleteProduct"
-                                data-id="{{ $product->id }}" data-name="{{ $product->name }}">
-                                <i class="ti ti-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="8" class="text-center text-muted">Belum ada produk.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mt-3">
-            {{ $products->links('pagination::bootstrap-4') }}
+    </div>
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="ti ti-filter me-2 text-primary"></i>Filter & Pencarian
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form class="row g-3 align-items-end" method="GET" action="">
+                        <div class="col-md-3">
+                            <label for="filter_category" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-category me-1 text-primary"></i> Kategori
+                            </label>
+                            <select name="category_id" id="filter_category" class="form-select">
+                                <option value="">-- Semua Kategori --</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}" @if(isset($selectedCategory) && $selectedCategory == $cat->id) selected @endif>{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_name" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-search me-1 text-primary"></i> Nama Produk
+                            </label>
+                            <input type="text" name="name" id="filter_name" class="form-control" placeholder="Cari nama produk..." value="{{ $searchName ?? '' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="sort_by" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-sort-descending me-1 text-primary"></i> Urutkan
+                            </label>
+                            <select name="sort_by" id="sort_by" class="form-select">
+                                <option value="">Tanggal Terbaru</option>
+                                <option value="price" @if(isset($sortBy) && $sortBy=='price') selected @endif>Harga</option>
+                                <option value="stock" @if(isset($sortBy) && $sortBy=='stock') selected @endif>Stok</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="sort_order" class="form-label mb-2 fw-semibold">
+                                <i class="ti ti-arrows-sort me-1 text-primary"></i> Urutan
+                            </label>
+                            <select name="sort_order" id="sort_order" class="form-select">
+                                <option value="desc" @if(isset($sortOrder) && $sortOrder=='desc') selected @endif>Terbesar</option>
+                                <option value="asc" @if(isset($sortOrder) && $sortOrder=='asc') selected @endif>Terkecil</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ti ti-search me-1"></i> Filter
+                            </button>
+                            <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">
+                                <i class="ti ti-refresh me-1"></i> Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    
+    <!-- Data Table Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="ti ti-list me-2 text-primary"></i>Daftar Produk
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <tr>
+                                    <th class="text-center fw-bold" style="width: 60px">#</th>
+                                    <th class="fw-bold"><i class="ti ti-category me-1"></i>Kategori</th>
+                                    <th class="fw-bold"><i class="ti ti-package me-1"></i>Nama Produk</th>
+                                    <th class="fw-bold"><i class="ti ti-file-text me-1"></i>Deskripsi</th>
+                                    <th class="fw-bold text-end"><i class="ti ti-currency-dollar me-1"></i>Harga</th>
+                                    <th class="fw-bold text-center"><i class="ti ti-stack me-1"></i>Stok</th>
+                                    <th class="fw-bold text-center"><i class="ti ti-photo me-1"></i>Gambar</th>
+                                    <th class="fw-bold text-center" style="width:120px;"><i class="ti ti-settings me-1"></i>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($products as $product)
+                                <tr>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark fw-semibold">{{ $loop->iteration }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary-subtle text-primary">
+                                            {{ $product->category->name ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-success-subtle rounded me-2">
+                                                <i class="ti ti-package text-success"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-semibold">{{ $product->name }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">{{ Str::limit($product->description ?? '-', 50) }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="fw-bold text-success">
+                                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if($product->stock > 10)
+                                            <span class="badge bg-success-subtle text-success">{{ $product->stock }}</span>
+                                        @elseif($product->stock > 0)
+                                            <span class="badge bg-warning-subtle text-warning">{{ $product->stock }}</span>
+                                        @else
+                                            <span class="badge bg-danger-subtle text-danger">{{ $product->stock }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @if($product->image)
+                                            <img src="{{ asset('storage/products/' . $product->image) }}" alt="Foto" 
+                                                 class="rounded-3 border shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+                                        @else
+                                            <div class="avatar-sm bg-light rounded d-inline-flex align-items-center justify-content-center">
+                                                <i class="ti ti-photo text-muted"></i>
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-primary btn-sm btnEditProduct" data-bs-toggle="tooltip" title="Edit"
+                                                data-id="{{ $product->id }}" data-category="{{ $product->category_id }}"
+                                                data-name="{{ $product->name }}" data-description="{{ $product->description }}"
+                                                data-price="{{ $product->price }}" data-stock="{{ $product->stock }}"
+                                                data-image="{{ $product->image }}">
+                                                <i class="ti ti-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm btnDeleteProduct" data-bs-toggle="tooltip" title="Hapus"
+                                                data-id="{{ $product->id }}" data-name="{{ $product->name }}">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="ti ti-package text-muted" style="font-size: 3rem;"></i>
+                                            <h6 class="mt-2 text-muted">Belum ada produk</h6>
+                                            <p class="text-muted mb-0">Klik tombol "Tambah Produk" untuk menambah data</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @if(method_exists($products, 'hasPages') && $products->hasPages())
+                        <div class="card-footer bg-white border-0">
+                            <div class="d-flex justify-content-center">
+                                {{ $products->links('pagination::bootstrap-4') }}
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
 <!-- Modal Tambah/Edit Produk -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
     <div class="modal-dialog">

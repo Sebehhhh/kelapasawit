@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -49,7 +50,7 @@ class UserController extends Controller
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone'    => ['nullable', 'string', 'max:20'],
-            'role'     => ['required', Rule::in(['admin', 'owner', 'pelanggan'])],
+            'role'     => ['required', Rule::in(['admin', 'owner', 'customer'])],
             'password' => ['required', 'string', 'min:6'],
         ]);
 
@@ -71,7 +72,7 @@ class UserController extends Controller
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'phone'    => ['nullable', 'string', 'max:20'],
-            'role'     => ['required', Rule::in(['admin', 'owner', 'pelanggan'])],
+            'role'     => ['required', Rule::in(['admin', 'owner', 'customer'])],
         ];
 
         // Password hanya jika diisi
@@ -105,5 +106,12 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'Pengguna berhasil dihapus.']);
+    }
+
+    public function printReport(Request $request)
+    {
+        $users = \App\Models\User::orderByDesc('created_at')->get();
+        $pdf = Pdf::loadView('admin.users.report-pdf', compact('users'));
+        return $pdf->download('laporan-pengguna-' . date('Y-m-d') . '.pdf');
     }
 }

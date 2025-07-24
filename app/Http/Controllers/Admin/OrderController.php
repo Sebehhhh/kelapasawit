@@ -80,12 +80,49 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with(['details.product', 'payment'])->findOrFail($id);
+        $oldStatus = $order->status;
         $validated = $request->validate([
             'status' => 'required|in:pending,paid,shipped,cancelled',
         ]);
-        $order->status = $validated['status'];
+        
+        $newStatus = $validated['status'];
+        
+        // Jika status berubah ke 'cancelled', kembalikan stok
+        if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
+            $order->restoreStock();
+        }
+        
+        // Jika status berubah dari 'cancelled' ke status lain, kurangi stok lagi
+        if ($oldStatus === 'cancelled' && $newStatus !== 'cancelled') {
+            try {
+                $order->reserveStock();
+            } catch (\Exception $e) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $e->getMessage()
+                    ], 400);
+                }
+                return redirect()->route('admin.orders.index')
+                    ->with('error', $e->getMessage());
+            }
+        }
+        
+        $order->status = $newStatus;
         $order->save();
+        
+        // Update payment status berdasarkan order status
+        if ($order->payment) {
+            if ($newStatus === 'cancelled') {
+                $order->payment->status = 'rejected';
+                $order->payment->save();
+            } elseif ($newStatus === 'paid') {
+                $order->payment->status = 'confirmed';
+                $order->payment->save();
+            }
+        }
+        
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Status order berhasil diupdate.', 'order' => $order]);
         }
@@ -185,11 +222,13 @@ class OrderController extends Controller
      */
     public function validatePayment(Request $request, $id)
     {
-        $payment = Payment::with('order')->findOrFail($id);
+        $payment = Payment::with(['order.details.product'])->findOrFail($id);
         $action = $request->input('action'); // 'accept' atau 'reject'
+        
         if ($payment->status !== 'pending') {
             return back()->with('error', 'Pembayaran sudah divalidasi.');
         }
+        
         if ($action === 'accept') {
             $payment->status = 'confirmed';
             $payment->save();
@@ -200,9 +239,43 @@ class OrderController extends Controller
         } elseif ($action === 'reject') {
             $payment->status = 'rejected';
             $payment->save();
-            // Order tetap pending
-            return back()->with('success', 'Pembayaran ditolak.');
+            
+            // Ketika payment di-reject, kembalikan stok karena order tidak valid
+            $payment->order->restoreStock();
+            
+            // Update order status ke cancelled
+            $payment->order->status = 'cancelled';
+            $payment->order->save();
+            
+            return back()->with('success', 'Pembayaran ditolak dan stok dikembalikan.');
         }
+        
         return back()->with('error', 'Aksi tidak valid.');
+    }
+
+    public function printStrukKeluar(Request $request)
+    {
+        $orders = \App\Models\Order::with(['user', 'details.product'])
+            ->where('status', 'shipped')
+            ->orderByDesc('created_at')->get();
+        $pdf = Pdf::loadView('admin.orders.struk-keluar-pdf', compact('orders'));
+        return $pdf->download('struk-keluar-penjualan-' . date('Y-m-d') . '.pdf');
+    }
+    public function printStrukMasuk(Request $request)
+    {
+        $invoices = \App\Models\PurchaseInvoice::with(['details.product'])->orderByDesc('purchase_date')->get();
+        return \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.struk-masuk-pdf', compact('invoices'))
+            ->download('struk-masuk-pembelian-' . date('Y-m-d') . '.pdf');
+    }
+
+    public function printSalesReport(Request $request)
+    {
+        $orders = \App\Models\Order::where('status', 'shipped')
+            ->selectRaw('DATE(created_at) as tanggal, SUM(total_amount) as total, COUNT(*) as jumlah')
+            ->groupByRaw('DATE(created_at)')
+            ->orderByDesc('tanggal')
+            ->get();
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.sales-report-pdf', compact('orders'));
+        return $pdf->download('laporan-penjualan-harian-' . date('Y-m-d') . '.pdf');
     }
 }

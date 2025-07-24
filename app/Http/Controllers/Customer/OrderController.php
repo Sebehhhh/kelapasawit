@@ -14,7 +14,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with(['details.product', 'details.testimonial', 'details.product.category'])
+        $orders = Order::with(['details.product', 'details.testimonial', 'details.product.category', 'payment'])
             ->where('user_id', auth()->id())
             ->orderByDesc('order_date')
             ->paginate(10);
@@ -53,7 +53,23 @@ class OrderController extends Controller
                 ]);
             }
 
-            $total = $product->price * $request->qty;
+            // Check for active promotion
+            $promotion = \App\Models\Promotion::active()
+                ->forProduct($product->id)
+                ->first();
+
+            $originalPrice = $product->price;
+            $finalPrice = $originalPrice;
+            $discountAmount = 0;
+            $promotionId = null;
+
+            if ($promotion) {
+                $discountAmount = $promotion->calculateDiscount($originalPrice, $request->qty);
+                $finalPrice = $promotion->getFinalPrice($originalPrice, $request->qty); // per unit after discount
+                $promotionId = $promotion->id;
+            }
+
+            $total = $finalPrice * $request->qty;
 
             // Simpan Order
             $order = Order::create([
@@ -65,21 +81,32 @@ class OrderController extends Controller
 
             // Simpan OrderDetail
             OrderDetail::create([
-                'order_id'   => $order->id,
-                'product_id' => $product->id,
-                'quantity'   => $request->qty,
-                'price'      => $product->price,
+                'order_id'        => $order->id,
+                'product_id'      => $product->id,
+                'quantity'        => $request->qty,
+                'price'           => $finalPrice,
+                'promotion_id'    => $promotionId,
+                'original_price'  => $originalPrice,
+                'discount_amount' => $discountAmount,
             ]);
 
-            // Kurangi stok produk
-            $product->decrement('stock', $request->qty);
+            // Stok akan otomatis dikurangi oleh OrderDetail model event, jadi tidak perlu manual decrement di sini
 
             DB::commit();
 
+            $message = 'Order berhasil dibuat! Silakan lakukan pembayaran.';
+            if ($promotion && $discountAmount > 0) {
+                $message .= ' Anda mendapat diskon Rp ' . number_format($discountAmount, 0, ',', '.') . ' dari promosi "' . $promotion->title . '"!';
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Order berhasil dibuat! Silakan lakukan pembayaran.',
-                'order_id' => $order->id
+                'message' => $message,
+                'order_id' => $order->id,
+                'discount_applied' => $discountAmount > 0,
+                'discount_amount' => $discountAmount,
+                'original_total' => $originalPrice * $request->qty,
+                'final_total' => $total
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();

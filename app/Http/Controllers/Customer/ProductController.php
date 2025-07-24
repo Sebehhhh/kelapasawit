@@ -12,12 +12,17 @@ class ProductController extends Controller
      */
     public function index()
     {
-        // Eager load kategori untuk tampilan katalog
-        $products = Product::with('category')
+        // Eager load kategori dan promosi aktif untuk tampilan katalog
+        $products = Product::with(['category', 'promotions' => function($query) {
+                $query->active(); // Only load active promotions
+            }])
             ->orderByDesc('created_at')
             ->paginate(9); // Bisa sesuaikan per page
 
-        return view('customer.products.index', compact('products'));
+        // Get all categories for filter dropdown
+        $categories = \App\Models\Category::orderBy('name')->get();
+
+        return view('customer.products.index', compact('products', 'categories'));
     }
 
 }

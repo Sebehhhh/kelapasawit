@@ -18,6 +18,11 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->unsignedBigInteger('product_id')->nullable(); // FK opsional ke produk tertentu
+            $table->enum('discount_type', ['percentage', 'fixed'])->default('percentage');
+            $table->decimal('discount_value', 8, 2)->default(0);
+            $table->decimal('min_purchase', 10, 2)->nullable();
+            $table->decimal('max_discount', 10, 2)->nullable();
+            $table->boolean('is_active')->default(true);
             $table->string('image', 255)->nullable(); // banner promosi
             $table->timestamps();
     

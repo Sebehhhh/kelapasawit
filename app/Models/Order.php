@@ -17,4 +17,32 @@ class Order extends Model
     protected $casts = [
         'order_date' => 'datetime',
     ];
+    
+    /**
+     * Restore stock for all items in this order
+     */
+    public function restoreStock()
+    {
+        foreach ($this->details as $detail) {
+            if ($detail->product) {
+                $detail->product->increment('stock', $detail->quantity);
+            }
+        }
+    }
+    
+    /**
+     * Reserve stock for all items in this order
+     */
+    public function reserveStock()
+    {
+        foreach ($this->details as $detail) {
+            if ($detail->product) {
+                // Check if stock is sufficient
+                if ($detail->product->stock < $detail->quantity) {
+                    throw new \Exception("Stok {$detail->product->name} tidak cukup! Sisa stok: {$detail->product->stock}");
+                }
+                $detail->product->decrement('stock', $detail->quantity);
+            }
+        }
+    }
 }

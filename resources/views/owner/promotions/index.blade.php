@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', 'Monitoring Promosi')
+@section('title', 'Difiturkan')
 @section('content')
 <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
-        <h4 class="fw-bold mb-0">Monitoring Promosi</h4>
+        <h4 class="mb-0">Difiturkan</h4>
         <div>
             <a href="{{ route('owner.promotions.printReport', request()->all()) }}" target="_blank" class="btn btn-success me-2">
                 <i class="ti ti-printer"></i> Cetak Laporan
