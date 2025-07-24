@@ -68,4 +68,31 @@ class OrderController extends Controller
         $pdf = Pdf::loadView('owner.orders.report-pdf', $data);
         return $pdf->download('laporan-order-' . date('Y-m-d') . '.pdf');
     }
+
+    public function printSalesReport(Request $request)
+    {
+        $orders = Order::where('status', 'shipped')
+            ->selectRaw('DATE(created_at) as tanggal, SUM(total_amount) as total, COUNT(*) as jumlah')
+            ->groupByRaw('DATE(created_at)')
+            ->orderByDesc('tanggal')
+            ->get();
+        $pdf = Pdf::loadView('owner.orders.sales-report-pdf', compact('orders'));
+        return $pdf->download('laporan-penjualan-harian-' . date('Y-m-d') . '.pdf');
+    }
+
+    public function printStrukKeluar(Request $request)
+    {
+        $orders = Order::with(['user', 'details.product'])
+            ->where('status', 'shipped')
+            ->orderByDesc('created_at')->get();
+        $pdf = Pdf::loadView('owner.orders.struk-keluar-pdf', compact('orders'));
+        return $pdf->download('struk-keluar-penjualan-' . date('Y-m-d') . '.pdf');
+    }
+
+    public function printStrukMasuk(Request $request)
+    {
+        $invoices = \App\Models\PurchaseInvoice::with(['details.product'])->orderByDesc('purchase_date')->get();
+        $pdf = Pdf::loadView('owner.orders.struk-masuk-pdf', compact('invoices'));
+        return $pdf->download('struk-masuk-pembelian-' . date('Y-m-d') . '.pdf');
+    }
 } 

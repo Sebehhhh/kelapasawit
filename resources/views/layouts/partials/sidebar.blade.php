@@ -226,6 +226,96 @@
               <span class="hide-menu">Testimoni</span>
             </a>
           </li>
+          
+          <!-- Menu Report Owner - Same as Admin -->
+          <li class="sidebar-item">
+            <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+              <i class="ti ti-file-report"></i>
+              <span class="hide-menu">Laporan</span>
+            </a>
+            <ul aria-expanded="false" class="collapse first-level">
+              <li class="sidebar-item">
+                <a href="{{ route('owner.products.sawitUnggulReport') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Sawit Unggul</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.products.sawitLokalReport') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Sawit Lokal</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.products.sawitImporReport') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Sawit Impor</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.promotions.printReport') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Produk Difiturkan</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.purchase-invoices.printReport') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Pembelian Pemasok</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.orders.strukMasuk') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Struk Masuk</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.orders.strukKeluar') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Struk Keluar</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.orders.salesReport') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Hasil Penjualan</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.products.stokReport') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Stok Barang</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{{ route('owner.users.printReport') }}" class="sidebar-link">
+                  <div class="round-16 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-circle"></i>
+                  </div>
+                  <span class="hide-menu">Pengguna</span>
+                </a>
+              </li>
+            </ul>
+          </li>
         @endif
 
       </ul>

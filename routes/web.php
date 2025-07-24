@@ -136,7 +136,21 @@ Route::prefix('owner')->name('owner.')->middleware(['auth', 'owner'])->group(fun
     Route::get('testimonials', [\App\Http\Controllers\Owner\TestimonialController::class, 'index'])->name('testimonials.index');
     Route::get('promotions', [\App\Http\Controllers\Owner\PromotionController::class, 'index'])->name('promotions.index');
     Route::get('promotions/print-report', [\App\Http\Controllers\Owner\PromotionController::class, 'printReport'])->name('promotions.printReport');
-    // Tambahkan menu monitoring lain jika perlu
+    
+    // Shared report routes - use admin controllers
+    Route::get('products/stok-report', [AdminProductController::class, 'printStokReport'])->name('products.stokReport');
+    Route::get('products/top-products-report', [AdminProductController::class, 'printTopProductsReport'])->name('products.topProductsReport');
+    Route::get('products/sawit-unggul-report', [AdminProductController::class, 'printSawitUnggulReport'])->name('products.sawitUnggulReport');
+    Route::get('products/sawit-lokal-report', [AdminProductController::class, 'printSawitLokalReport'])->name('products.sawitLokalReport');
+    Route::get('products/sawit-impor-report', [AdminProductController::class, 'printSawitImporReport'])->name('products.sawitImporReport');
+    Route::get('orders/sales-report', [AdminOrderController::class, 'printSalesReport'])->name('orders.salesReport');
+    Route::get('orders/struk-keluar', [AdminOrderController::class, 'printStrukKeluar'])->name('orders.strukKeluar');
+    Route::get('orders/struk-masuk', [AdminOrderController::class, 'printStrukMasuk'])->name('orders.strukMasuk');
+    Route::get('users/print-report', [AdminUserController::class, 'printReport'])->name('users.printReport');
+    Route::get('categories/print-report', [AdminCategoryController::class, 'printReport'])->name('categories.printReport');
+    Route::get('purchase-invoices/print-report', [App\Http\Controllers\Admin\PurchaseInvoiceController::class, 'printReport'])->name('purchase-invoices.printReport');
+    Route::get('product-returns/print-report', [App\Http\Controllers\ProductReturnController::class, 'printReport'])->name('product-returns.printReport');
+    Route::get('supplier-purchases/print-report', [SupplierPurchaseController::class, 'printReport'])->name('supplier-purchases.printReport');
 });
 
 // ================= PUBLIC ROUTES =================
