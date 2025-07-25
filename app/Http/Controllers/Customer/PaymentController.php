@@ -75,7 +75,7 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        $payments = Payment::with(['order'])
+        $payments = Payment::with(['order', 'paymentMethod'])
             ->whereHas('order', function($q){
                 $q->where('user_id', Auth::id());
             })

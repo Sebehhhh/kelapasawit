@@ -32,6 +32,11 @@
                         <input type="email" class="form-control" value="{{ $user->email }}" readonly>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Nomor WhatsApp</label>
+                        <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $user->phone) }}" placeholder="08xxxxxxxxxx">
+                        @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Alamat Pengiriman</label>
                         <textarea name="address" class="form-control @error('address') is-invalid @enderror" rows="2" required>{{ old('address', $user->address) }}</textarea>
                         @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror

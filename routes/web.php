@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\TestimonialController as AdminTestimonialController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AdminPaymentMethodController;
 
 use App\Http\Controllers\Customer\ProductController as CustomerProductController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
@@ -88,6 +89,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('orders/{id}/print-invoice', [AdminOrderController::class, 'printInvoice'])->name('orders.printInvoice');
     Route::resource('users', AdminUserController::class)->except('show');
     Route::resource('testimonials', AdminTestimonialController::class)->except('show');
+    Route::resource('payment-methods', AdminPaymentMethodController::class)->except(['show', 'create', 'edit']);
     Route::get('promotions/products-list', [AdminPromotionController::class, 'productsList'])->name('promotions.productsList');
     Route::get('products/print-report', [AdminProductController::class, 'printReport'])->name('products.printReport');
     Route::get('categories/print-report', [AdminCategoryController::class, 'printReport'])->name('categories.printReport');

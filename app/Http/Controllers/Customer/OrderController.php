@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\PaymentMethod;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,11 @@ class OrderController extends Controller
         ->whereDoesntHave('testimonial')
         ->with('product')
         ->get();
-        return view('customer.orders.index', compact('orders', 'eligibleOrderDetails'));
+        
+        // Ambil semua metode pembayaran
+        $paymentMethods = PaymentMethod::get()->groupBy('type');
+        
+        return view('customer.orders.index', compact('orders', 'eligibleOrderDetails', 'paymentMethods'));
     }
 
     /**

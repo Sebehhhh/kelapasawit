@@ -72,6 +72,12 @@
               <span class="hide-menu">Testimoni</span>
             </a>
           </li>
+          <li class="sidebar-item">
+            <a class="sidebar-link" href="{{ route('admin.payment-methods.index') }}">
+              <i class="ti ti-credit-card"></i>
+              <span class="hide-menu">Metode Pembayaran</span>
+            </a>
+          </li>
           
           <!-- Menu Report -->
           <li class="sidebar-item">

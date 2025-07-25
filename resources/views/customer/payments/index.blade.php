@@ -29,7 +29,18 @@
                         <td>{{ $pay->payment_date ? \Carbon\Carbon::parse($pay->payment_date)->format('d/m/Y H:i') : '-' }}</td>
                         <td>#{{ $pay->order_id }}</td>
                         <td>Rp {{ number_format($pay->amount_paid, 0, ',', '.') }}</td>
-                        <td>{{ ucfirst(str_replace('_',' ',$pay->payment_method)) }}</td>
+                        <td>
+                            @if($pay->paymentMethod)
+                                @if($pay->paymentMethod->type == 'e-wallet')
+                                    💳 {{ $pay->paymentMethod->name }}
+                                @else
+                                    🏦 {{ $pay->paymentMethod->name }}
+                                @endif
+                                <br><small class="text-muted">{{ $pay->paymentMethod->account_number }}</small>
+                            @else
+                                <span class="text-muted">Metode tidak tersedia</span>
+                            @endif
+                        </td>
                         <td>
                             <span class="badge 
                                 @if($pay->status == 'pending') bg-warning

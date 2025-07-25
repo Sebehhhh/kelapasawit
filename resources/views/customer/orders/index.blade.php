@@ -273,7 +273,7 @@
                     <div class="alert alert-info">
                         <i class="ti ti-info-circle me-2"></i>
                         <strong>Informasi Pembayaran:</strong><br>
-                        Silakan transfer ke rekening yang tersedia dan upload bukti pembayaran
+                        Silakan pilih metode pembayaran di bawah ini dan transfer sesuai instruksi
                     </div>
                     
                     <div class="mb-3">
@@ -286,11 +286,48 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Metode Pembayaran</label>
-                        <select name="payment_method" class="form-select" required>
+                        <select name="payment_method" class="form-select" id="paymentMethodSelect" required>
                             <option value="">Pilih Metode Pembayaran</option>
-                            <option value="bank_transfer">🏦 Transfer Bank</option>
-                            <option value="ewallet">💳 E-Wallet (OVO, DANA, GoPay)</option>
+                            @if(isset($paymentMethods['rekening']))
+                            <optgroup label="🏦 Transfer Bank">
+                                @foreach($paymentMethods['rekening'] as $method)
+                                <option value="{{ $method->id }}" data-type="rekening" data-name="{{ $method->name }}" data-number="{{ $method->account_number }}" data-owner="{{ $method->account_name }}" data-instructions="{{ $method->instructions }}">
+                                    {{ $method->name }} - {{ $method->account_number }}
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
+                            @if(isset($paymentMethods['e-wallet']))
+                            <optgroup label="💳 E-Wallet">
+                                @foreach($paymentMethods['e-wallet'] as $method)
+                                <option value="{{ $method->id }}" data-type="e-wallet" data-name="{{ $method->name }}" data-number="{{ $method->account_number }}" data-owner="{{ $method->account_name }}" data-instructions="{{ $method->instructions }}">
+                                    {{ $method->name }} - {{ $method->account_number }}
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
                         </select>
+                    </div>
+                    
+                    <div id="paymentDetails" class="mb-3" style="display: none;">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="ti ti-credit-card me-2"></i>Detail Pembayaran</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Metode:</strong> <span id="selectedMethodName"></span></p>
+                                        <p class="mb-1"><strong>Nomor:</strong> <span id="selectedMethodNumber" class="text-primary fw-bold"></span></p>
+                                        <p class="mb-0"><strong>A.n:</strong> <span id="selectedMethodOwner"></span></p>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                <div class="alert alert-warning mb-0">
+                                    <small><i class="ti ti-info-circle me-1"></i><span id="selectedMethodInstructions"></span></small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
@@ -451,8 +488,28 @@
             document.getElementById('payOrderTotal').innerText = Number(btn.dataset.total).toLocaleString('id-ID');
             document.getElementById('payAmount').value = btn.dataset.total;
             document.getElementById('payOrderAlert').classList.add('d-none');
+            // Reset payment method selection
+            document.getElementById('paymentMethodSelect').value = '';
+            document.getElementById('paymentDetails').style.display = 'none';
             new bootstrap.Modal(document.getElementById('modalPayOrder')).show();
         });
+    });
+
+    // Handle payment method selection
+    document.getElementById('paymentMethodSelect').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const paymentDetails = document.getElementById('paymentDetails');
+        
+        if (selectedOption.value) {
+            // Show payment details
+            document.getElementById('selectedMethodName').textContent = selectedOption.dataset.name;
+            document.getElementById('selectedMethodNumber').textContent = selectedOption.dataset.number;
+            document.getElementById('selectedMethodOwner').textContent = selectedOption.dataset.owner;
+            document.getElementById('selectedMethodInstructions').textContent = selectedOption.dataset.instructions;
+            paymentDetails.style.display = 'block';
+        } else {
+            paymentDetails.style.display = 'none';
+        }
     });
     
     document.getElementById('formPayOrder').onsubmit = function(e){

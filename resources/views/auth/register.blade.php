@@ -97,6 +97,22 @@
                     @enderror
                   </div>
 
+                  {{-- Input Nomor WhatsApp --}}
+                  <div class="mb-4">
+                    <label for="phone" class="form-label fw-semibold">Nomor WhatsApp</label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-light border-end-0">
+                        <i class="fab fa-whatsapp text-muted"></i>
+                      </span>
+                      <input id="phone" type="text" class="form-control border-start-0 @error('phone') is-invalid @enderror" name="phone" value="{{ old('phone') }}" required autocomplete="tel" placeholder="08xxxxxxxxxx">
+                    </div>
+                    @error('phone')
+                      <div class="invalid-feedback d-block mt-1">
+                        {{ $message }}
+                      </div>
+                    @enderror
+                  </div>
+
                   {{-- Input Password --}}
                   <div class="mb-4">
                     <label for="password" class="form-label fw-semibold">Password</label>
